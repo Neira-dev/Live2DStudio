@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Live2D models (not distributed via Git)
+App/Live2D/*
+!App/Live2D/.gitkeep
