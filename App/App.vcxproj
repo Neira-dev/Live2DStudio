@@ -132,6 +132,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="EntryPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DirectX12\DirectX12.vcxproj">
@@ -143,6 +144,9 @@
     <ProjectReference Include="..\ImGui\ImGui.vcxproj">
       <Project>{87e243f2-491f-4191-93cb-e8a244245d51}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

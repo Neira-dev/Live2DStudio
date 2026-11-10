@@ -1,68 +1,103 @@
-#include "../Window/Window.h"
+#include "App.h"
 
+#include "../Window/Window.h"
 #include "../DirectX12/DX12Device.h"
-#include "../DirectX12/Descriptor.h"
 #include "../DirectX12/DX12CommandQueue.h"
 #include "../DirectX12/DX12SwapChain.h"
 #include "../DirectX12/DX12Renderer.h"
 
+#include "../DirectX12/Descriptor.h"
 #include "../ImGui/ImGuiLayer.h"
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+App::App()
 {
-	Window::WindowDesc desc;
-	desc.hInstance = hInstance;
-	desc.nCmdShow = nCmdShow;
-	Window window(desc);
+}
 
-	DX12Device::DeviceDesc deviceDesc;
-	DX12Device device;
-	device.Initialize(deviceDesc);
-
-	Descriptor descriptor;
-	descriptor.Initialize(&device);
-
-	DX12CommandQueue commandQueue;
-	commandQueue.Initialize(device.GetDevice(), D3D12_COMMAND_LIST_TYPE_DIRECT);
-
-	DX12SwapChain::SwapChainDesc swapChainDesc;
-	swapChainDesc.width = window.GetDesc().width;
-	swapChainDesc.height = window.GetDesc().height;
-	swapChainDesc.hwnd = window.GetHwnd();
-	swapChainDesc.device = &device;
-	swapChainDesc.commandQueue = &commandQueue;
-	swapChainDesc.BufferCount = 2;
-
-	DX12SwapChain swapChain;
-	swapChain.Initialize(swapChainDesc);
-
-	DX12Renderer renderer;
-	renderer.Initialize(&device, &commandQueue, &swapChain);
-
-	ImGuiLayer imGuiLayer;
-	imGuiLayer.Initialize({ window.GetHwnd(), device.GetDevice(), commandQueue.GetCommandQueue(), swapChain.GetBufferCount(), DXGI_FORMAT_R8G8B8A8_UNORM, 64 });
-	window.AddWndProc(ImGuiLayer::WndProcHandler);
-
-	MSG msg;
-	while (GetMessage(&msg, nullptr, 0, 0))
+App::~App()
+{
+	_gui.reset();
+	if(_renderer)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-
-		// 描画処理
-		renderer.BeginFrame(descriptor.GetDescriptorHeap());
-		imGuiLayer.BeginFrame();
-	
-		ImGui::Begin("Hello, ImGui!");
-		ImGui::Text("This is some useful text.");
-		ImGui::End();
-		
-
-		imGuiLayer.EndFrame(renderer.GetCommandList());
-		renderer.EndFrame();
+		_renderer->Release();
+		_renderer.reset();
 	}
+	_swapChain.reset();
+	_commandQueue.reset();
+	Descriptor::Singleton()->Release();
+	_device.reset();
+	_window.reset();
+}
 
-	imGuiLayer.Shutdown();
-	renderer.Release();
-	return (int)msg.wParam;
+void App::Init(HINSTANCE hInstance, int nCmdShow)
+{
+	// ウィンドウの作成
+	Window::WindowDesc windowDesc;
+	windowDesc.hInstance = hInstance;
+	windowDesc.nCmdShow = nCmdShow;
+	windowDesc.width = 1280;
+	windowDesc.height = 720;
+	windowDesc.windowClass.className = L"Live2DGraphicStudio";
+	windowDesc.windowSettings.title[0] = L'Live2DGraphicStudio';
+	_window = std::make_unique<Window>(windowDesc);
+
+	// DX12デバイスの作成
+	_device = std::make_unique<DX12Device>();
+	DX12Device::DeviceDesc deviceDesc;
+	_device->Initialize(deviceDesc);
+
+	// ディスクリプタの作成
+	Descriptor::Singleton()->Initialize(_device.get());
+
+	// コマンドキューの作成
+	_commandQueue = std::make_unique<DX12CommandQueue>();
+	_commandQueue->Initialize(_device->GetDevice(), D3D12_COMMAND_LIST_TYPE_DIRECT);
+
+	// スワップチェインの作成
+	_swapChain = std::make_unique<DX12SwapChain>();
+	DX12SwapChain::SwapChainDesc swapChainDesc;
+	swapChainDesc.width = _window->GetDesc().width;
+	swapChainDesc.height = _window->GetDesc().height;
+	swapChainDesc.hwnd = _window->GetHwnd();
+	swapChainDesc.device = _device.get();
+	swapChainDesc.commandQueue = _commandQueue.get();
+	_swapChain->Initialize(swapChainDesc);
+
+	// レンダラーの作成
+	_renderer = std::make_unique<DX12Renderer>();
+	_renderer->Initialize(_device.get(), _commandQueue.get(), _swapChain.get());
+
+	// ImGuiの初期化
+	_gui = std::make_unique<ImGuiLayer>();
+	ImGuiLayer::ImGuiLayerDesc guiDesc;
+	guiDesc.hwnd = _window->GetHwnd();
+	guiDesc.device = _device->GetDevice();
+	guiDesc.bufferCount = _swapChain->GetBufferCount();
+	guiDesc.commandQueue = _commandQueue->GetCommandQueue();
+	_gui->Initialize(guiDesc);
+
+	// ImGuiのWndProcを登録
+	_window->AddWndProc(ImGuiLayer::WndProcHandler);
+}
+
+void App::Update()
+{
+}
+
+void App::Draw()
+{
+	_renderer->BeginFrame(Descriptor::Singleton()->GetDescriptorHeap());
+
+
+
+	_gui->BeginFrame();
+
+	ImGui::ShowDemoWindow();
+
+	_gui->EndFrame(_renderer->GetCommandList());
+
+	_renderer->EndFrame();
+}
+
+void App::UnInit()
+{
 }
