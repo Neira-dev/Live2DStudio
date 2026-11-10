@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
+    <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DirectX12\DirectX12.vcxproj">
@@ -147,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="Scene.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

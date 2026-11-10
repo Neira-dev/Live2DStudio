@@ -9,6 +9,8 @@
 #include "../DirectX12/Descriptor.h"
 #include "../ImGui/ImGuiLayer.h"
 
+#include "Scene.h"
+
 App::App()
 {
 }
@@ -77,21 +79,26 @@ void App::Init(HINSTANCE hInstance, int nCmdShow)
 
 	// ImGui‚ÌWndProc‚ð“o˜^
 	_window->AddWndProc(ImGuiLayer::WndProcHandler);
+
+	_scene = std::make_unique<Scene>();
+	_scene->Init();
+
 }
 
 void App::Update()
 {
+	_scene->Update();
 }
 
 void App::Draw()
 {
 	_renderer->BeginFrame(Descriptor::Singleton()->GetDescriptorHeap());
 
-
+	_scene->Draw(_renderer->GetCommandList());
 
 	_gui->BeginFrame();
 
-	ImGui::ShowDemoWindow();
+	_scene->DrawImGui();
 
 	_gui->EndFrame(_renderer->GetCommandList());
 
