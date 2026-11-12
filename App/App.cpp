@@ -39,7 +39,15 @@ void App::Init(HINSTANCE hInstance, int nCmdShow)
 	windowDesc.width = 1280;
 	windowDesc.height = 720;
 	windowDesc.windowClass.className = L"Live2DGraphicStudio";
-	windowDesc.windowSettings.title[0] = L'Live2DGraphicStudio';
+	WCHAR title[256] = L"Live2DGraphicStudio";
+	for(int i = 0; i < 256; ++i)
+	{
+		windowDesc.windowSettings.title[i] = title[i];
+		if(title[i] == L'\0')
+		{
+			break;
+		}
+	}
 	_window = std::make_unique<Window>(windowDesc);
 
 	// DX12デバイスの作成

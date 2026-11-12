@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -77,9 +77,11 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Framework\src;$(ProjectDir)Core\include;$(ProjectDir)Cubism;$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
+      <AdditionalLibraryDirectories>$(ProjectDir)Core\lib\windows\x86\143;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Live2DCubismCore_MDd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
@@ -93,9 +95,11 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Framework\src;$(ProjectDir)Core\include;$(ProjectDir)Cubism;$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
+      <AdditionalLibraryDirectories>$(ProjectDir)Core\lib\windows\x86\143;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Live2DCubismCore_MD.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
@@ -107,9 +111,11 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Framework\src;$(ProjectDir)Core\include;$(ProjectDir)Cubism;$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
+      <AdditionalLibraryDirectories>$(ProjectDir)Core\lib\windows\x86_64\143;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Live2DCubismCore_MDd.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
@@ -123,9 +129,11 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Framework\src;$(ProjectDir)Core\include;$(ProjectDir)Cubism;$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
+      <AdditionalLibraryDirectories>$(ProjectDir)Core\lib\windows\x86_64\143;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Live2DCubismCore_MD.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
@@ -134,6 +142,56 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Cubism\CubismRenderer_D3D12.cpp" />
+    <ClCompile Include="Framework\src\CubismCdiJson.cpp" />
+    <ClCompile Include="Framework\src\CubismDefaultParameterId.cpp" />
+    <ClCompile Include="Framework\src\CubismFramework.cpp" />
+    <ClCompile Include="Framework\src\CubismModelSettingJson.cpp" />
+    <ClCompile Include="Framework\src\Effect\CubismBreath.cpp" />
+    <ClCompile Include="Framework\src\Effect\CubismEyeBlink.cpp" />
+    <ClCompile Include="Framework\src\Effect\CubismLook.cpp" />
+    <ClCompile Include="Framework\src\Effect\CubismPose.cpp" />
+    <ClCompile Include="Framework\src\Id\CubismId.cpp" />
+    <ClCompile Include="Framework\src\Id\CubismIdManager.cpp" />
+    <ClCompile Include="Framework\src\Math\CubismMath.cpp" />
+    <ClCompile Include="Framework\src\Math\CubismMatrix44.cpp" />
+    <ClCompile Include="Framework\src\Math\CubismModelMatrix.cpp" />
+    <ClCompile Include="Framework\src\Math\CubismTargetPoint.cpp" />
+    <ClCompile Include="Framework\src\Math\CubismVector2.cpp" />
+    <ClCompile Include="Framework\src\Math\CubismViewMatrix.cpp" />
+    <ClCompile Include="Framework\src\Model\CubismMoc.cpp" />
+    <ClCompile Include="Framework\src\Model\CubismModel.cpp" />
+    <ClCompile Include="Framework\src\Model\CubismModelMultiplyAndScreenColor.cpp" />
+    <ClCompile Include="Framework\src\Model\CubismModelUserData.cpp" />
+    <ClCompile Include="Framework\src\Model\CubismModelUserDataJson.cpp" />
+    <ClCompile Include="Framework\src\Model\CubismUserModel.cpp" />
+    <ClCompile Include="Framework\src\Motion\ACubismMotion.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismBreathUpdater.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismExpressionMotion.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismExpressionMotionManager.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismExpressionUpdater.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismEyeBlinkUpdater.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismLipSyncUpdater.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismLookUpdater.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismMotion.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismMotionJson.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismMotionManager.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismMotionQueueEntry.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismMotionQueueManager.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismPhysicsUpdater.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismPoseUpdater.cpp" />
+    <ClCompile Include="Framework\src\Motion\CubismUpdateScheduler.cpp" />
+    <ClCompile Include="Framework\src\Motion\ICubismUpdater.cpp" />
+    <ClCompile Include="Framework\src\Motion\IParameterProvider.cpp" />
+    <ClCompile Include="Framework\src\Physics\CubismPhysics.cpp" />
+    <ClCompile Include="Framework\src\Physics\CubismPhysicsJson.cpp" />
+    <ClCompile Include="Framework\src\Rendering\CubismRenderer.cpp" />
+    <ClCompile Include="Framework\src\Rendering\csmBlendMode.cpp" />
+    <ClCompile Include="Framework\src\Type\csmRectF.cpp" />
+    <ClCompile Include="Framework\src\Type\csmString.cpp" />
+    <ClCompile Include="Framework\src\Utils\CubismDebug.cpp" />
+    <ClCompile Include="Framework\src\Utils\CubismJson.cpp" />
+    <ClCompile Include="Framework\src\Utils\CubismString.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DirectX12\DirectX12.vcxproj">
@@ -149,6 +207,72 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Core\include\Live2DCubismCore.h" />
+    <ClInclude Include="Cubism\CubismRenderer_D3D12.hpp" />
+    <ClInclude Include="Framework\src\CubismCdiJson.hpp" />
+    <ClInclude Include="Framework\src\CubismDefaultParameterId.hpp" />
+    <ClInclude Include="Framework\src\CubismFramework.hpp" />
+    <ClInclude Include="Framework\src\CubismFrameworkConfig.hpp" />
+    <ClInclude Include="Framework\src\CubismJsonHolder.hpp" />
+    <ClInclude Include="Framework\src\CubismModelSettingJson.hpp" />
+    <ClInclude Include="Framework\src\Effect\CubismBreath.hpp" />
+    <ClInclude Include="Framework\src\Effect\CubismEyeBlink.hpp" />
+    <ClInclude Include="Framework\src\Effect\CubismLook.hpp" />
+    <ClInclude Include="Framework\src\Effect\CubismPose.hpp" />
+    <ClInclude Include="Framework\src\ICubismAllocator.hpp" />
+    <ClInclude Include="Framework\src\ICubismModelSetting.hpp" />
+    <ClInclude Include="Framework\src\Id\CubismId.hpp" />
+    <ClInclude Include="Framework\src\Id\CubismIdManager.hpp" />
+    <ClInclude Include="Framework\src\Live2DCubismCore.hpp" />
+    <ClInclude Include="Framework\src\Math\CubismMath.hpp" />
+    <ClInclude Include="Framework\src\Math\CubismMatrix44.hpp" />
+    <ClInclude Include="Framework\src\Math\CubismModelMatrix.hpp" />
+    <ClInclude Include="Framework\src\Math\CubismTargetPoint.hpp" />
+    <ClInclude Include="Framework\src\Math\CubismVector2.hpp" />
+    <ClInclude Include="Framework\src\Math\CubismViewMatrix.hpp" />
+    <ClInclude Include="Framework\src\Model\CubismMoc.hpp" />
+    <ClInclude Include="Framework\src\Model\CubismModel.hpp" />
+    <ClInclude Include="Framework\src\Model\CubismModelMultiplyAndScreenColor.hpp" />
+    <ClInclude Include="Framework\src\Model\CubismModelUserData.hpp" />
+    <ClInclude Include="Framework\src\Model\CubismModelUserDataJson.hpp" />
+    <ClInclude Include="Framework\src\Model\CubismUserModel.hpp" />
+    <ClInclude Include="Framework\src\Motion\ACubismMotion.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismBreathUpdater.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismExpressionMotion.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismExpressionMotionManager.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismExpressionUpdater.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismEyeBlinkUpdater.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismLipSyncUpdater.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismLookUpdater.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismMotion.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismMotionInternal.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismMotionJson.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismMotionManager.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismMotionQueueEntry.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismMotionQueueManager.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismPhysicsUpdater.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismPoseUpdater.hpp" />
+    <ClInclude Include="Framework\src\Motion\CubismUpdateScheduler.hpp" />
+    <ClInclude Include="Framework\src\Motion\ICubismUpdater.hpp" />
+    <ClInclude Include="Framework\src\Motion\IParameterProvider.hpp" />
+    <ClInclude Include="Framework\src\Physics\CubismPhysics.hpp" />
+    <ClInclude Include="Framework\src\Physics\CubismPhysicsInternal.hpp" />
+    <ClInclude Include="Framework\src\Physics\CubismPhysicsJson.hpp" />
+    <ClInclude Include="Framework\src\Rendering\CubismClippingManager.hpp" />
+    <ClInclude Include="Framework\src\Rendering\CubismClippingManager.tpp" />
+    <ClInclude Include="Framework\src\Rendering\CubismRenderer.hpp" />
+    <ClInclude Include="Framework\src\Rendering\ICubismOffscreenManager.hpp" />
+    <ClInclude Include="Framework\src\Rendering\ICubismOffscreenRenderTarget.hpp" />
+    <ClInclude Include="Framework\src\Rendering\csmBlendMode.hpp" />
+    <ClInclude Include="Framework\src\Type\CubismBasicType.hpp" />
+    <ClInclude Include="Framework\src\Type\csmMap.hpp" />
+    <ClInclude Include="Framework\src\Type\csmRectF.hpp" />
+    <ClInclude Include="Framework\src\Type\csmString.hpp" />
+    <ClInclude Include="Framework\src\Type\csmVector.hpp" />
+    <ClInclude Include="Framework\src\Type\csmVectorSort.hpp" />
+    <ClInclude Include="Framework\src\Utils\CubismDebug.hpp" />
+    <ClInclude Include="Framework\src\Utils\CubismJson.hpp" />
+    <ClInclude Include="Framework\src\Utils\CubismString.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

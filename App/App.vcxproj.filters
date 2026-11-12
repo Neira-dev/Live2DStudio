@@ -9,6 +9,45 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="Live2D">
+      <UniqueIdentifier>{BC1D05DE-DDEA-40CF-AF72-6A32AC8A4CC9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Core">
+      <UniqueIdentifier>{92FD6F1F-9877-4181-A408-DE1ECBC61820}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework">
+      <UniqueIdentifier>{2F077E92-CA8D-49D0-A543-535776B825D2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework\Effect">
+      <UniqueIdentifier>{7AA65255-3536-46BB-B98C-6A37C0517541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework\Id">
+      <UniqueIdentifier>{9249BC58-83DE-4EF3-955D-E001CD0C8A8C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework\Math">
+      <UniqueIdentifier>{D098D32D-7D27-4603-A642-CC180BFA5BC1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework\Model">
+      <UniqueIdentifier>{6DF82CBE-C12E-4B0C-9737-B57E4957FD39}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework\Motion">
+      <UniqueIdentifier>{2CA39897-3E85-4EB7-B0F0-A5A30EA6D660}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework\Physics">
+      <UniqueIdentifier>{0D33FAA7-FCF3-46E4-9D53-0099FDB399A2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework\Rendering">
+      <UniqueIdentifier>{61BCBBFC-651B-4A27-8999-0C4E3BEE74C5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework\Type">
+      <UniqueIdentifier>{4FD2E584-89FB-480E-B684-F56319F4B972}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Framework\Utils">
+      <UniqueIdentifier>{6183C81E-B2E5-4A41-AF23-19D615584F6F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Live2D\Renderer">
+      <UniqueIdentifier>{29AB2A61-5994-45F6-BCDE-A17A3ED714B6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="EntryPoint.cpp">
@@ -20,6 +59,156 @@
     <ClCompile Include="Scene.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Cubism\CubismRenderer_D3D12.cpp">
+      <Filter>Live2D\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\CubismCdiJson.cpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\CubismDefaultParameterId.cpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\CubismFramework.cpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\CubismModelSettingJson.cpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Effect\CubismBreath.cpp">
+      <Filter>Live2D\Framework\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Effect\CubismEyeBlink.cpp">
+      <Filter>Live2D\Framework\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Effect\CubismLook.cpp">
+      <Filter>Live2D\Framework\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Effect\CubismPose.cpp">
+      <Filter>Live2D\Framework\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Id\CubismId.cpp">
+      <Filter>Live2D\Framework\Id</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Id\CubismIdManager.cpp">
+      <Filter>Live2D\Framework\Id</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Math\CubismMath.cpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Math\CubismMatrix44.cpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Math\CubismModelMatrix.cpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Math\CubismTargetPoint.cpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Math\CubismVector2.cpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Math\CubismViewMatrix.cpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Model\CubismMoc.cpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Model\CubismModel.cpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Model\CubismModelMultiplyAndScreenColor.cpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Model\CubismModelUserData.cpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Model\CubismModelUserDataJson.cpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Model\CubismUserModel.cpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\ACubismMotion.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismBreathUpdater.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismExpressionMotion.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismExpressionMotionManager.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismExpressionUpdater.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismEyeBlinkUpdater.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismLipSyncUpdater.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismLookUpdater.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismMotion.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismMotionJson.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismMotionManager.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismMotionQueueEntry.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismMotionQueueManager.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismPhysicsUpdater.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismPoseUpdater.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\CubismUpdateScheduler.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\ICubismUpdater.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Motion\IParameterProvider.cpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Physics\CubismPhysics.cpp">
+      <Filter>Live2D\Framework\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Physics\CubismPhysicsJson.cpp">
+      <Filter>Live2D\Framework\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Rendering\CubismRenderer.cpp">
+      <Filter>Live2D\Framework\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Rendering\csmBlendMode.cpp">
+      <Filter>Live2D\Framework\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Type\csmRectF.cpp">
+      <Filter>Live2D\Framework\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Type\csmString.cpp">
+      <Filter>Live2D\Framework\Type</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Utils\CubismDebug.cpp">
+      <Filter>Live2D\Framework\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Utils\CubismJson.cpp">
+      <Filter>Live2D\Framework\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework\src\Utils\CubismString.cpp">
+      <Filter>Live2D\Framework\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h">
@@ -27,6 +216,204 @@
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\include\Live2DCubismCore.h">
+      <Filter>Live2D\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Cubism\CubismRenderer_D3D12.hpp">
+      <Filter>Live2D\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\CubismCdiJson.hpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\CubismDefaultParameterId.hpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\CubismFramework.hpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\CubismFrameworkConfig.hpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\CubismJsonHolder.hpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\CubismModelSettingJson.hpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Effect\CubismBreath.hpp">
+      <Filter>Live2D\Framework\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Effect\CubismEyeBlink.hpp">
+      <Filter>Live2D\Framework\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Effect\CubismLook.hpp">
+      <Filter>Live2D\Framework\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Effect\CubismPose.hpp">
+      <Filter>Live2D\Framework\Effect</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\ICubismAllocator.hpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\ICubismModelSetting.hpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Id\CubismId.hpp">
+      <Filter>Live2D\Framework\Id</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Id\CubismIdManager.hpp">
+      <Filter>Live2D\Framework\Id</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Live2DCubismCore.hpp">
+      <Filter>Live2D\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Math\CubismMath.hpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Math\CubismMatrix44.hpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Math\CubismModelMatrix.hpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Math\CubismTargetPoint.hpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Math\CubismVector2.hpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Math\CubismViewMatrix.hpp">
+      <Filter>Live2D\Framework\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Model\CubismMoc.hpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Model\CubismModel.hpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Model\CubismModelMultiplyAndScreenColor.hpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Model\CubismModelUserData.hpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Model\CubismModelUserDataJson.hpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Model\CubismUserModel.hpp">
+      <Filter>Live2D\Framework\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\ACubismMotion.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismBreathUpdater.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismExpressionMotion.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismExpressionMotionManager.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismExpressionUpdater.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismEyeBlinkUpdater.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismLipSyncUpdater.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismLookUpdater.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismMotion.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismMotionInternal.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismMotionJson.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismMotionManager.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismMotionQueueEntry.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismMotionQueueManager.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismPhysicsUpdater.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismPoseUpdater.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\CubismUpdateScheduler.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\ICubismUpdater.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Motion\IParameterProvider.hpp">
+      <Filter>Live2D\Framework\Motion</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Physics\CubismPhysics.hpp">
+      <Filter>Live2D\Framework\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Physics\CubismPhysicsInternal.hpp">
+      <Filter>Live2D\Framework\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Physics\CubismPhysicsJson.hpp">
+      <Filter>Live2D\Framework\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Rendering\CubismClippingManager.hpp">
+      <Filter>Live2D\Framework\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Rendering\CubismClippingManager.tpp">
+      <Filter>Live2D\Framework\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Rendering\CubismRenderer.hpp">
+      <Filter>Live2D\Framework\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Rendering\ICubismOffscreenManager.hpp">
+      <Filter>Live2D\Framework\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Rendering\ICubismOffscreenRenderTarget.hpp">
+      <Filter>Live2D\Framework\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Rendering\csmBlendMode.hpp">
+      <Filter>Live2D\Framework\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Type\CubismBasicType.hpp">
+      <Filter>Live2D\Framework\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Type\csmMap.hpp">
+      <Filter>Live2D\Framework\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Type\csmRectF.hpp">
+      <Filter>Live2D\Framework\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Type\csmString.hpp">
+      <Filter>Live2D\Framework\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Type\csmVector.hpp">
+      <Filter>Live2D\Framework\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Type\csmVectorSort.hpp">
+      <Filter>Live2D\Framework\Type</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Utils\CubismDebug.hpp">
+      <Filter>Live2D\Framework\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Utils\CubismJson.hpp">
+      <Filter>Live2D\Framework\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\src\Utils\CubismString.hpp">
+      <Filter>Live2D\Framework\Utils</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
