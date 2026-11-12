@@ -173,23 +173,33 @@ HRESULT DX12Renderer::BeginFrame(ID3D12DescriptorHeap* descriptorHeap)
 	_commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	_commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-	D3D12_VIEWPORT viewport = {};
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-	viewport.Width = _swapChain->GetDesc().width;
-	viewport.Height = _swapChain->GetDesc().height;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
+	_viewport = {};
+	_viewport.TopLeftX = 0.0f;
+	_viewport.TopLeftY = 0.0f;
+	_viewport.Width = static_cast<float>(_swapChain->GetDesc().width);
+	_viewport.Height = static_cast<float>(_swapChain->GetDesc().height);
+	_viewport.MinDepth = 0.0f;
+	_viewport.MaxDepth = 1.0f;
 
-	D3D12_RECT scissorRect = {};
-	scissorRect.left = 0;
-	scissorRect.top = 0;
-	scissorRect.right = _swapChain->GetDesc().width;
-	scissorRect.bottom = _swapChain->GetDesc().height;
+	_scissorRect = {};
+	_scissorRect.left = 0;
+	_scissorRect.top = 0;
+	_scissorRect.right = _swapChain->GetDesc().width;
+	_scissorRect.bottom = _swapChain->GetDesc().height;
 
-	_commandList->RSSetViewports(1, &viewport);
-	_commandList->RSSetScissorRects(1, &scissorRect);
+	_commandList->RSSetViewports(1, &_viewport);
+	_commandList->RSSetScissorRects(1, &_scissorRect);
 	return S_OK;
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE DX12Renderer::GetCurrentRTV() const
+{
+	return _swapChain->GetRTV(_currentFrameIndex);
+}
+
+D3D12_CPU_DESCRIPTOR_HANDLE DX12Renderer::GetDSV() const
+{
+	return _depthStencilHeap->GetCPUDescriptorHandleForHeapStart();
 }
 
 HRESULT DX12Renderer::EndFrame()

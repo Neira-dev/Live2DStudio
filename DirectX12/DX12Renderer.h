@@ -52,6 +52,37 @@ public:
 	 * @return
 	 */
 	HRESULT Resize(UINT width, UINT height);
+
+	/**
+	 * @brief 現在のフレームのバックバッファのRTVを取得する
+	 * @details BeginFrame〜EndFrameの間のみ有効
+	 */
+	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRTV() const;
+
+	/**
+	 * @brief 深度バッファのDSVを取得する
+	 */
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDSV() const;
+
+	/**
+	 * @brief 現在のフレームのビューポートを取得する
+	 */
+	const D3D12_VIEWPORT& GetViewport() const { return _viewport; }
+
+	/**
+	 * @brief 現在のフレームのシザー矩形を取得する
+	 */
+	const D3D12_RECT& GetScissorRect() const { return _scissorRect; }
+
+	/**
+	 * @brief 同時に処理中になり得るフレーム数を取得する
+	 */
+	UINT GetFrameCount() const { return static_cast<UINT>(_frameContexts.size()); }
+
+	/**
+	 * @brief 深度バッファのフォーマットを取得する
+	 */
+	static constexpr DXGI_FORMAT GetDepthStencilFormat() { return DepthStencilFormat; }
 protected:
 	/**
 	 * @brief 深度バッファを作成する
@@ -70,6 +101,8 @@ protected:
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> _commandList;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> _depthStencilHeap;
 	Microsoft::WRL::ComPtr<ID3D12Resource> _depthStencilBuffer;
+	D3D12_VIEWPORT _viewport = {};
+	D3D12_RECT _scissorRect = {};
 
 	static constexpr DXGI_FORMAT DepthStencilFormat = DXGI_FORMAT_D32_FLOAT;
 };

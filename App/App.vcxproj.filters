@@ -62,6 +62,12 @@
     <ClCompile Include="Cubism\CubismRenderer_D3D12.cpp">
       <Filter>Live2D\Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Cubism\Live2DModel.cpp">
+      <Filter>Live2D</Filter>
+    </ClCompile>
+    <ClCompile Include="Cubism\Live2D.cpp">
+      <Filter>Live2D</Filter>
+    </ClCompile>
     <ClCompile Include="Framework\src\CubismCdiJson.cpp">
       <Filter>Live2D\Framework</Filter>
     </ClCompile>
@@ -222,6 +228,12 @@
     </ClInclude>
     <ClInclude Include="Cubism\CubismRenderer_D3D12.hpp">
       <Filter>Live2D\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Cubism\Live2DModel.h">
+      <Filter>Live2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Cubism\Live2D.h">
+      <Filter>Live2D</Filter>
     </ClInclude>
     <ClInclude Include="Framework\src\CubismCdiJson.hpp">
       <Filter>Live2D\Framework</Filter>

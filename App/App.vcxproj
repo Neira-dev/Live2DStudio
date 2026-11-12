@@ -143,6 +143,8 @@
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Cubism\CubismRenderer_D3D12.cpp" />
+    <ClCompile Include="Cubism\Live2DModel.cpp" />
+    <ClCompile Include="Cubism\Live2D.cpp" />
     <ClCompile Include="Framework\src\CubismCdiJson.cpp" />
     <ClCompile Include="Framework\src\CubismDefaultParameterId.cpp" />
     <ClCompile Include="Framework\src\CubismFramework.cpp" />
@@ -209,6 +211,8 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Core\include\Live2DCubismCore.h" />
     <ClInclude Include="Cubism\CubismRenderer_D3D12.hpp" />
+    <ClInclude Include="Cubism\Live2DModel.h" />
+    <ClInclude Include="Cubism\Live2D.h" />
     <ClInclude Include="Framework\src\CubismCdiJson.hpp" />
     <ClInclude Include="Framework\src\CubismDefaultParameterId.hpp" />
     <ClInclude Include="Framework\src\CubismFramework.hpp" />

@@ -17,6 +17,11 @@ App::App()
 
 App::~App()
 {
+	if (_scene)
+	{
+		_scene->UnInit();
+		_scene.reset();
+	}
 	_gui.reset();
 	if(_renderer)
 	{
@@ -89,7 +94,7 @@ void App::Init(HINSTANCE hInstance, int nCmdShow)
 	_window->AddWndProc(ImGuiLayer::WndProcHandler);
 
 	_scene = std::make_unique<Scene>();
-	_scene->Init();
+	_scene->Init(_device.get(), _commandQueue.get(), _renderer.get());
 
 }
 

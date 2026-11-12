@@ -8,11 +8,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	app.Init(hInstance,nCmdShow);
 
 
-	MSG msg;
-	while (GetMessage(&msg, nullptr, 0, 0))
+	// Messages are handled with PeekMessage so Update/Draw run every frame even with no window messages
+	MSG msg = {};
+	while (msg.message != WM_QUIT)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+			continue;
+		}
 
 		app.Update();
 		app.Draw();
