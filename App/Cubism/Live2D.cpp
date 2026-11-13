@@ -5,6 +5,11 @@
 #include "../../DirectX12/DX12CommandQueue.h"
 #include "../../DirectX12/DX12Renderer.h"
 
+#include "../Camera.h"
+
+#include <DirectXMath.h>
+#include <cmath>
+
 namespace
 {
 	DX12Renderer* g_renderer = nullptr;
@@ -55,6 +60,11 @@ bool Live2D::PlayMotion(const std::filesystem::path& path, bool loop)
 	return _model->PlayMotion(path, loop);
 }
 
+void Live2D::StopMotion()
+{
+	if (_model) { _model->StopMotion(); }
+}
+
 void Live2D::Update(float deltaSeconds)
 {
 	_model->Update(deltaSeconds);
@@ -75,7 +85,52 @@ void Live2D::Draw(ID3D12GraphicsCommandList* commandList)
 	target.viewport = g_renderer->GetViewport();
 	target.scissor = g_renderer->GetScissorRect();
 
+	if (_camera != nullptr && target.viewport.Height > 0.0f)
+	{
+		using namespace DirectX;
+
+		// ローカル：足元の中心を原点にし、高さを _worldHeight（m）にする
+		float left, right, bottom, top;
+		_model->GetModelBounds(left, right, bottom, top);
+		const float unit = _worldHeight / (top - bottom);
+		const XMMATRIX local = XMMatrixTranslation(-(left + right) * 0.5f, -bottom, 0.0f) * XMMatrixScaling(unit, unit, unit);
+
+		// 向き：ビルボードならカメラの方を向くよう Y 軸回りに回す（モデルの正面は -Z）
+		const XMFLOAT3 cameraPosition = _camera->GetPosition();
+		float yaw = XMConvertToRadians(_worldRotationY);
+		if (_billboard)
+		{
+			const float dx = cameraPosition.x - _worldPosition[0];
+			const float dz = cameraPosition.z - _worldPosition[2];
+			if (dx * dx + dz * dz > 1e-6f)
+			{
+				yaw = std::atan2(-dx, -dz);
+			}
+		}
+		const XMMATRIX world = local * XMMatrixRotationY(yaw)
+			* XMMatrixTranslation(_worldPosition[0], _worldPosition[1], _worldPosition[2]);
+
+		const float aspect = target.viewport.Width / target.viewport.Height;
+		const XMMATRIX worldViewProjection = world * _camera->GetViewProjection(aspect);
+
+		// DirectXMath（行ベクトル用・行優先）の並びは、列ベクトル用・列優先の行列と同じ並びになる
+		XMFLOAT4X4 matrix;
+		XMStoreFloat4x4(&matrix, worldViewProjection);
+		_model->SetWorldViewProjection(&matrix._11);
+	}
+	else
+	{
+		_model->SetWorldViewProjection(nullptr);
+	}
+
 	_model->Draw(commandList, target);
+}
+
+void Live2D::SetWorldPosition(float x, float y, float z)
+{
+	_worldPosition[0] = x;
+	_worldPosition[1] = y;
+	_worldPosition[2] = z;
 }
 
 void Live2D::SetPosition(float x, float y)

@@ -9,6 +9,9 @@
 *   model->Load(L"Live2D/DeepSeek");                    // フォルダー or .model3.json
 *   model->Update(deltaSeconds);                        // 毎フレーム
 *   model->Draw(commandList);                           // 毎フレーム（BeginFrame〜EndFrame の間）
+*   model->SetCamera(&camera);                          // 3D 空間に置く（nullptr で 2D に戻る）
+*   model->SetWorldPosition(0, 0, 0);                   // 足元の位置
+*   model->SetBillboard(true);                          // カメラの方を向く（false で SetWorldRotationY の向き）
 *   model.reset();
 *   Live2D::Shutdown();                                 // 最後に1回（モデルを全て破棄した後）
 */
@@ -21,6 +24,7 @@ class DX12Device;
 class DX12CommandQueue;
 class DX12Renderer;
 class Live2DModel;
+class Camera;
 
 class Live2D
 {
@@ -60,6 +64,11 @@ public:
 	bool PlayMotion(const std::filesystem::path& path, bool loop = false);
 
 	/**
+	 * @brief 再生中のモーションを停止する
+	 */
+	void StopMotion();
+
+	/**
 	 * @brief モーション・目パチ・呼吸・物理演算を更新する
 	 * @param deltaSeconds 前フレームからの経過秒数
 	 */
@@ -86,6 +95,41 @@ public:
 	 */
 	bool IsLoaded() const;
 
+	// ---- 3D 空間への配置 ----
+
+	/**
+	 * @brief 3D 表示に使うカメラ（nullptr なら従来の 2D 表示）
+	 * @details カメラは Live2D より長く生存させること
+	 */
+	void SetCamera(const Camera* camera) { _camera = camera; }
+
+	/**
+	 * @brief 足元の位置（m、Y = 0 が床）
+	 */
+	void SetWorldPosition(float x, float y, float z);
+
+	/**
+	 * @brief 向き（Y 軸回りの角度、度）。ビルボードが無効のときに使う
+	 */
+	void SetWorldRotationY(float degrees) { _worldRotationY = degrees; }
+
+	/**
+	 * @brief 3D 空間での身長（m）
+	 */
+	void SetWorldHeight(float height) { _worldHeight = height > 0.01f ? height : 0.01f; }
+
+	/**
+	 * @brief 常にカメラの方を向くか（Y 軸回りだけ回転するので、立ったまま向きが変わる）
+	 */
+	void SetBillboard(bool enable) { _billboard = enable; }
+
 private:
 	std::unique_ptr<Live2DModel> _model;
+
+	// 3D
+	const Camera* _camera = nullptr;
+	float _worldPosition[3] = { 0.0f, 0.0f, 0.0f };
+	float _worldRotationY = 0.0f;
+	float _worldHeight = 1.6f;
+	bool _billboard = true;
 };

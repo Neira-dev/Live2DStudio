@@ -64,6 +64,11 @@ public:
 	virtual bool PlayMotion(const std::filesystem::path& path, bool loop) = 0;
 
 	/**
+	 * @brief 再生中のモーションを停止する
+	 */
+	virtual void StopMotion() = 0;
+
+	/**
 	 * @brief パラメータ・物理演算などを更新する
 	 */
 	virtual void Update(float deltaSeconds) = 0;
@@ -75,5 +80,18 @@ public:
 
 	virtual void SetPosition(float x, float y) = 0;
 	virtual void SetScale(float scale) = 0;
+
+	/**
+	 * @brief 3D 表示用の行列を設定する
+	 * @param matrix モデルの座標（GetModelBounds と同じ単位）からクリップ空間への行列。
+	 *               列ベクトル用・列優先の 16 要素（DirectXMath の XMFLOAT4X4 をそのまま渡せる）。
+	 *               nullptr なら 2D 表示（SetPosition / SetScale）に戻す。
+	 */
+	virtual void SetWorldViewProjection(const float* matrix) = 0;
+
+	/**
+	 * @brief 読み込み時のポーズでの、全パーツを囲む範囲（モデルの座標、Y は上向き）
+	 */
+	virtual void GetModelBounds(float& left, float& right, float& bottom, float& top) const = 0;
 	virtual bool IsLoaded() const = 0;
 };

@@ -327,9 +327,11 @@ D3D12_GRAPHICS_PIPELINE_STATE_DESC MakePsoDesc(ID3DBlob* vs, ID3DBlob* ps, CullT
 	desc.RasterizerState.FrontCounterClockwise = TRUE; // Cubism は反時計回りが表面
 	desc.RasterizerState.DepthClipEnable = TRUE;
 
-	desc.DepthStencilState.DepthEnable = FALSE;
+	// 3D 空間に置いたとき、手前の物（床など）に隠れるように深度テストだけ行う。
+	// パーツは同じ平面にあるので深度は書き込まない（書くと後から描くパーツが消える）。
+	desc.DepthStencilState.DepthEnable = (dsvFormat != DXGI_FORMAT_UNKNOWN) ? TRUE : FALSE;
 	desc.DepthStencilState.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
-	desc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+	desc.DepthStencilState.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 	desc.DepthStencilState.StencilEnable = FALSE;
 
 	desc.InputLayout = { inputLayout, _countof(inputLayout) };
@@ -1021,6 +1023,9 @@ void CubismRenderer_D3D12::DoDrawModel()
 
 	_commandList->SetGraphicsRootSignature(g_shared.rootSignature.Get());
 	_commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	// マスクが無いモデルでも、指定された描画先（オフスクリーンなど）に描く
+	RestoreMainTarget();
 
 	// ---- クリッピングマスクの生成 ----
 	if (_clippingManager != nullptr)

@@ -8,6 +8,7 @@
 #include <wrl/client.h>
 
 #include <algorithm>
+#include <cfloat>
 #include <cstring>
 #include <fstream>
 #include <map>
@@ -578,6 +579,10 @@ public:
 
 		_model->SaveParameters();
 
+		// ---- 3D 表示用：読み込み時のポーズで全パーツを囲む範囲 ----
+		_model->Update();
+		ComputeBounds();
+
 		// ---- model3.json に登録されたモーション ----
 		for (csmInt32 g = 0; g < _setting->GetMotionGroupCount(); ++g)
 		{
@@ -654,6 +659,11 @@ public:
 		return true;
 	}
 
+	void StopMotion() override
+	{
+		if (_motionManager) { _motionManager->StopAllMotions(); }
+	}
+
 	void Update(float deltaSeconds) override
 	{
 		if (!_loaded)
@@ -698,30 +708,38 @@ public:
 			return;
 		}
 
-		// 画面のアスペクト比に合わせる
 		CubismMatrix44 projection;
-		if (_model->GetCanvasWidth() > 1.0f && width < height)
+		if (_use3D)
 		{
-			_modelMatrix->SetWidth(2.0f);
-			projection.Scale(1.0f, width / height);
+			// 3D 表示：ワールド × ビュー × プロジェクションをそのまま使う
+			projection.SetMatrix(_worldViewProjection);
 		}
 		else
 		{
-			projection.Scale(height / width, 1.0f);
-		}
+			// 画面のアスペクト比に合わせる
+			if (_model->GetCanvasWidth() > 1.0f && width < height)
+			{
+				_modelMatrix->SetWidth(2.0f);
+				projection.Scale(1.0f, width / height);
+			}
+			else
+			{
+				projection.Scale(height / width, 1.0f);
+			}
 
-		// 表示位置・拡大率
-		csmFloat32 view[16] =
-		{
-			_scale, 0.0f,   0.0f, 0.0f,
-			0.0f,   _scale, 0.0f, 0.0f,
-			0.0f,   0.0f,   1.0f, 0.0f,
-			_posX,  _posY,  0.0f, 1.0f,
-		};
-		CubismMatrix44 viewMatrix;
-		viewMatrix.SetMatrix(view);
-		projection.MultiplyByMatrix(&viewMatrix);
-		projection.MultiplyByMatrix(_modelMatrix);
+			// 表示位置・拡大率
+			csmFloat32 view[16] =
+			{
+				_scale, 0.0f,   0.0f, 0.0f,
+				0.0f,   _scale, 0.0f, 0.0f,
+				0.0f,   0.0f,   1.0f, 0.0f,
+				_posX,  _posY,  0.0f, 1.0f,
+			};
+			CubismMatrix44 viewMatrix;
+			viewMatrix.SetMatrix(view);
+			projection.MultiplyByMatrix(&viewMatrix);
+			projection.MultiplyByMatrix(_modelMatrix);
+		}
 		renderer->SetMvpMatrix(&projection);
 
 		CubismRenderTargetBinding_D3D12 binding;
@@ -743,6 +761,23 @@ public:
 	void SetScale(float scale) override
 	{
 		_scale = scale;
+	}
+
+	void SetWorldViewProjection(const float* matrix) override
+	{
+		_use3D = (matrix != nullptr);
+		if (_use3D)
+		{
+			std::memcpy(_worldViewProjection, matrix, sizeof(_worldViewProjection));
+		}
+	}
+
+	void GetModelBounds(float& left, float& right, float& bottom, float& top) const override
+	{
+		left = _bounds[0];
+		right = _bounds[1];
+		bottom = _bounds[2];
+		top = _bounds[3];
 	}
 
 	bool IsLoaded() const override
@@ -769,6 +804,35 @@ private:
 		}
 		motion->SetEffectIds(_eyeBlinkIds, _lipSyncIds);
 		return motion;
+	}
+
+	void ComputeBounds()
+	{
+		float left = FLT_MAX, right = -FLT_MAX, bottom = FLT_MAX, top = -FLT_MAX;
+		const csmInt32 drawableCount = _model->GetDrawableCount();
+		for (csmInt32 d = 0; d < drawableCount; ++d)
+		{
+			if (_model->GetDrawableOpacity(d) <= 0.0f)
+			{
+				continue;  // 非表示のパーツ（差分など）は含めない
+			}
+			const csmInt32 count = _model->GetDrawableVertexCount(d);
+			const csmFloat32* vertices = _model->GetDrawableVertices(d);
+			for (csmInt32 i = 0; i < count; ++i)
+			{
+				left = (std::min)(left, vertices[i * 2 + 0]);
+				right = (std::max)(right, vertices[i * 2 + 0]);
+				bottom = (std::min)(bottom, vertices[i * 2 + 1]);
+				top = (std::max)(top, vertices[i * 2 + 1]);
+			}
+		}
+		if (left < right && bottom < top)
+		{
+			_bounds[0] = left;
+			_bounds[1] = right;
+			_bounds[2] = bottom;
+			_bounds[3] = top;
+		}
 	}
 
 	void StartIdleMotion()
@@ -834,6 +898,11 @@ private:
 	float _posX = 0.0f;
 	float _posY = 0.0f;
 	float _scale = 1.0f;
+
+	// 3D 表示
+	bool _use3D = false;
+	csmFloat32 _worldViewProjection[16] = {};
+	float _bounds[4] = { -1.0f, 1.0f, -1.0f, 1.0f };  // left, right, bottom, top（モデルの座標）
 };
 
 } // namespace

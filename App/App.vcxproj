@@ -142,6 +142,8 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="FloorGrid.cpp" />
     <ClCompile Include="Cubism\CubismRenderer_D3D12.cpp" />
     <ClCompile Include="Cubism\Live2DModel.cpp" />
     <ClCompile Include="Cubism\Live2D.cpp" />
@@ -209,6 +211,8 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="FloorGrid.h" />
     <ClInclude Include="Core\include\Live2DCubismCore.h" />
     <ClInclude Include="Cubism\CubismRenderer_D3D12.hpp" />
     <ClInclude Include="Cubism\Live2DModel.h" />
