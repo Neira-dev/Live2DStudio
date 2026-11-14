@@ -1,0 +1,236 @@
+/* CoStage ステージ画面 */
+
+body {
+	width: 100%;
+	height: 100%;
+	font-family: Meiryo;
+	font-size: 14px;
+	color: #e6e8ee;
+}
+
+/* ---------- 共通 ---------- */
+.panel {
+	position: absolute;
+	top: 64px;
+	bottom: 0;
+	background-color: #1d2027;
+	border: 1px #2c313b;
+}
+.panel-title {
+	display: block;
+	height: 26px;
+	line-height: 26px;
+	padding: 0 10px;
+	background-color: #262b35;
+	font-weight: bold;
+}
+.panel-body {
+	position: absolute;
+	top: 26px;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 8px 10px;
+	overflow-y: auto;
+}
+.section {
+	display: block;
+	margin: 12px 0 6px 0;
+	padding-bottom: 3px;
+	border-bottom: 1px #3a4150;
+	color: #a9b3c6;
+}
+.sub {
+	display: block;
+	margin: 8px 0 3px 0;
+	color: #8f99ad;
+	font-size: 13px;
+}
+.foldable { cursor: pointer; }
+.foldable:hover { color: #ffffff; }
+.muted { color: #858d9c; }
+.warn { color: #ff8a55; }
+.caption { color: #a9b3c6; margin-right: 6px; }
+.gap { margin-left: 24px; }
+
+button {
+	box-sizing: border-box;
+	display: inline-block;
+	padding: 3px 10px;
+	margin: 0 4px 4px 0;
+	background-color: #2f4a70;
+	border: 1px #3d5d8a;
+	border-radius: 3px;
+	color: #e6e8ee;
+	cursor: pointer;
+	text-align: center;
+}
+button:hover { background-color: #3b5d8c; }
+button:active { background-color: #24395a; }
+button.active { background-color: #2f7ff0; border-color: #5a9cff; }
+button.small { padding: 1px 8px; font-size: 13px; }
+button.wide { display: block; margin-bottom: 4px; }
+button.third { width: 31%; margin-right: 2%; padding: 3px 0; }
+button.effect.on { background-color: #c0562f; border-color: #e07650; }
+.key { color: #b8c4d8; font-size: 12px; }
+.button-row { display: block; margin: 4px 0; }
+.hotkey { display: block; margin: 2px 0; }
+
+/* チェックボックス */
+label.check {
+	display: inline-block;
+	margin-right: 10px;
+	cursor: pointer;
+}
+input.checkbox {
+	display: inline-block;
+	width: 14px;
+	height: 14px;
+	margin-right: 4px;
+	vertical-align: middle;
+	background-color: #13161b;
+	border: 1px #4a5262;
+	border-radius: 2px;
+}
+input.checkbox:hover { border-color: #7aa7ff; }
+input.checkbox:checked { background-color: #2f7ff0; border-color: #5a9cff; }
+
+/* スライダー */
+.slider-row {
+	display: block;
+	height: 24px;
+	margin: 2px 0;
+}
+.slider-row .label {
+	display: inline-block;
+	width: 70px;
+	color: #c4cbd8;
+}
+.slider-row .value {
+	display: inline-block;
+	width: 62px;
+	text-align: right;
+	color: #c4cbd8;
+}
+input.range {
+	display: inline-block;
+	width: 140px;
+	height: 14px;
+	vertical-align: middle;
+}
+input.range slidertrack {
+	margin-top: 5px;
+	height: 4px;
+	background-color: #13161b;
+	border-radius: 2px;
+}
+input.range sliderbar {
+	width: 12px;
+	height: 14px;
+	background-color: #5a9cff;
+	border-radius: 3px;
+}
+input.range sliderbar:hover { background-color: #8ab8ff; }
+input.range sliderarrowdec, input.range sliderarrowinc { width: 0; height: 0; }
+
+/* スクロールバー */
+scrollbarvertical {
+	width: 8px;
+}
+scrollbarvertical slidertrack { background-color: #1a1d23; }
+scrollbarvertical sliderbar { background-color: #3d4554; border-radius: 4px; }
+scrollbarvertical sliderbar:hover { background-color: #56607a; }
+scrollbarvertical sliderarrowdec, scrollbarvertical sliderarrowinc { height: 0; }
+
+/* ---------- 上部 ---------- */
+#topbar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 64px;
+	padding: 6px 10px 0 10px;
+	background-color: #252a33;
+	border-bottom: 1px #2c313b;
+}
+#topbar .row { display: block; height: 28px; }
+.room-code {
+	color: #ffd866;
+	font-weight: bold;
+	margin-right: 8px;
+}
+
+/* ---------- 左：参加者 ---------- */
+#participants {
+	left: 0;
+	width: 270px;
+}
+#participants .slider-row .label { width: 64px; }
+#participants .slider-row .value { width: 50px; }
+#participants input.range { width: 110px; }
+.actor {
+	display: block;
+	padding: 6px 6px 4px 6px;
+	margin-bottom: 6px;
+	background-color: #232731;
+	border: 1px #2c313b;
+	border-radius: 4px;
+	cursor: pointer;
+}
+.actor:hover { border-color: #46506a; }
+.actor.selected { border-color: #f0b450; background-color: #2a2e38; }
+.actor-name { display: block; font-weight: bold; margin-bottom: 2px; }
+.actor-status { display: block; margin-bottom: 4px; }
+.actor-controls { display: block; margin-top: 2px; }
+.tier { color: #9aa3b5; margin-right: 6px; }
+.state { margin-right: 8px; }
+.present { color: #73e573; }
+.unstable { color: #ffd84d; }
+.away { color: #a6a6b3; }
+.returning { color: #80ccff; }
+.lost { color: #ff8c33; }
+
+/* ---------- 右：ルック ---------- */
+#look {
+	right: 0;
+	width: 330px;
+}
+
+/* ---------- 中央：プレビュー（ここは透明。ステージは DX12 で下に描く）---------- */
+#preview {
+	position: absolute;
+	top: 64px;
+	bottom: 0;
+	left: 270px;
+	right: 330px;
+	cursor: move;
+}
+#overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 0;
+	height: 0;
+}
+.actor-box {
+	position: absolute;
+	border: 2px #f0b450;
+	border-radius: 4px;
+}
+.actor-box.hidden { display: none; }
+.actor-label {
+	position: absolute;
+	padding: 1px 8px;
+	background-color: #000000a0;
+	border-radius: 6px;
+	font-size: 13px;
+	white-space: nowrap;
+	transform: translateX(-50%);
+}
+#preview-hint {
+	position: absolute;
+	left: 8px;
+	bottom: 6px;
+	color: #9aa3b5;
+	font-size: 12px;
+}

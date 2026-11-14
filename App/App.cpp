@@ -7,7 +7,7 @@
 #include "../DirectX12/DX12Renderer.h"
 
 #include "../DirectX12/Descriptor.h"
-#include "../ImGui/ImGuiLayer.h"
+#include "UI/RmlUiLayer.h"
 
 #include "Scene.h"
 
@@ -22,7 +22,7 @@ App::~App()
 		_scene->UnInit();
 		_scene.reset();
 	}
-	_gui.reset();
+	_ui.reset();
 	if(_renderer)
 	{
 		_renderer->Release();
@@ -81,26 +81,31 @@ void App::Init(HINSTANCE hInstance, int nCmdShow)
 	_renderer = std::make_unique<DX12Renderer>();
 	_renderer->Initialize(_device.get(), _commandQueue.get(), _swapChain.get());
 
-	// ImGuiの初期化
-	_gui = std::make_unique<ImGuiLayer>();
-	ImGuiLayer::ImGuiLayerDesc guiDesc;
-	guiDesc.hwnd = _window->GetHwnd();
-	guiDesc.device = _device->GetDevice();
-	guiDesc.bufferCount = _swapChain->GetBufferCount();
-	guiDesc.commandQueue = _commandQueue->GetCommandQueue();
-	_gui->Initialize(guiDesc);
+	// UI（RmlUi）の初期化
+	_ui = std::make_unique<RmlUiLayer>();
+	RmlUiLayer::Desc uiDesc;
+	uiDesc.hwnd = _window->GetHwnd();
+	uiDesc.device = _device->GetDevice();
+	uiDesc.frameCount = _swapChain->GetBufferCount();
+	uiDesc.width = _window->GetDesc().width;
+	uiDesc.height = _window->GetDesc().height;
+	_ui->Initialize(uiDesc);
 
-	// ImGuiのWndProcを登録
-	_window->AddWndProc(ImGuiLayer::WndProcHandler);
+	// UI に Win32 のメッセージを渡す
+	_window->AddWndProc([this](HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam, LRESULT& result)
+	{
+		return _ui->HandleMessage(hwnd, message, wParam, lParam, result);
+	});
 
 	_scene = std::make_unique<Scene>();
-	_scene->Init(_device.get(), _commandQueue.get(), _renderer.get());
+	_scene->Init(_device.get(), _commandQueue.get(), _renderer.get(), _ui->GetContext());
 
 }
 
 void App::Update()
 {
 	_scene->Update();
+	_ui->Update();
 }
 
 void App::Draw()
@@ -109,11 +114,8 @@ void App::Draw()
 
 	_scene->Draw(_renderer->GetCommandList());
 
-	_gui->BeginFrame();
-
-	_scene->DrawImGui();
-
-	_gui->EndFrame(_renderer->GetCommandList());
+	// UI を一番上に重ねる
+	_ui->Render(_renderer->GetCommandList(), _renderer->GetCurrentRTV());
 
 	_renderer->EndFrame();
 

@@ -1,0 +1,215 @@
+<rml>
+<head>
+	<title>CoStage</title>
+	<link type="text/rcss" href="stage.rcss"/>
+</head>
+<body data-model="stage">
+
+	<!-- ===== 上部：配置テンプレ・招待コード・演出・出力 ===== -->
+	<div id="topbar">
+		<div class="row">
+			<span class="caption">配置</span>
+			<button data-for="name, i : layouts" data-class-active="layout == i" data-event-click="set_layout(i)">{{name}}</button>
+
+			<span class="caption gap">招待コード</span>
+			<button data-if="!has_room" data-event-click="create_room">ルームを作る</button>
+			<span data-if="has_room" class="room-code">{{room_code}}</span>
+			<span data-if="has_room" class="muted">（通信は未実装）</span>
+		</div>
+		<div class="row">
+			<span class="caption">演出</span>
+			<button class="effect" data-class-on="blackout" data-event-click="toggle_blackout">暗転 <span class="key">{{hotkey_blackout}}</span></button>
+			<button class="effect" data-class-on="spotlight" data-event-click="toggle_spotlight">スポットライト <span class="key">{{hotkey_spotlight}}</span></button>
+			<button class="effect" data-class-on="self_away" data-event-click="toggle_self_away">自分を離席 <span class="key">{{hotkey_away}}</span></button>
+
+			<label class="check gap"><input type="checkbox" data-checked="output_visible" data-event-change="output_changed"/> 出力ウィンドウ</label>
+			<label class="check"><input type="checkbox" data-checked="preview_chroma"/> プレビューをクロマキー背景に</label>
+		</div>
+	</div>
+
+	<!-- ===== 左：参加者 ===== -->
+	<div id="participants" class="panel">
+		<div class="panel-title">参加者</div>
+		<div class="panel-body">
+			<div class="actor" data-for="actor, i : actors" data-class-selected="actor.selected" data-event-click="select_actor(i)">
+				<div class="actor-name">{{actor.name}}</div>
+				<div class="actor-status">
+					<span class="tier">{{actor.tier}}</span>
+					<span class="state" data-class-present="actor.state_class == 'present'" data-class-unstable="actor.state_class == 'unstable'"
+						data-class-away="actor.state_class == 'away'" data-class-returning="actor.state_class == 'returning'"
+						data-class-lost="actor.state_class == 'lost'">{{actor.state}}</span>
+					<span class="muted">回線: {{actor.link}}</span>
+				</div>
+				<div class="actor-controls">
+					<label class="check"><input type="checkbox" data-checked="actor.manual_away" data-event-change="actor_changed(i)"/> 手動離席</label>
+					<button class="small" data-event-click="remove_actor(i)">外す</button>
+				</div>
+				<div class="actor-controls">
+					<span class="muted">テスト:</span>
+					<label class="check"><input type="checkbox" data-checked="actor.face_lost" data-event-change="actor_changed(i)"/> 顔ロスト</label>
+					<label class="check"><input type="checkbox" data-checked="actor.disconnected" data-event-change="actor_changed(i)"/> 回線断</label>
+				</div>
+			</div>
+
+			<div data-if="!room_full" class="add-list">
+				<div class="section">参加者を追加</div>
+				<button class="wide" data-for="model, m : models" data-event-click="add_actor(m)">＋ {{model}}</button>
+			</div>
+			<div data-if="room_full" class="muted">ルームは最大 {{max_actors}} 人です</div>
+
+			<div data-if="has_selection">
+				<div class="section">離席の設定（{{selected_name}}）</div>
+				<div class="slider-row">
+					<span class="label">離席まで</span>
+					<input type="range" min="1" max="10" step="0.1" data-value="away_delay" data-event-change="presence_changed"/>
+					<span class="value">{{away_delay | format(1)}} 秒</span>
+				</div>
+				<div class="slider-row">
+					<span class="label">復帰まで</span>
+					<input type="range" min="0.1" max="3" step="0.1" data-value="return_delay" data-event-change="presence_changed"/>
+					<span class="value">{{return_delay | format(1)}} 秒</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- ===== 中央：プレビュー ===== -->
+	<div id="preview">
+		<div id="overlay">
+			<div class="actor-box" data-for="actor : actors" data-class-hidden="!actor.selected"
+				data-style-left="actor.box_left" data-style-top="actor.box_top"
+				data-style-width="actor.box_width" data-style-height="actor.box_height"></div>
+			<div class="actor-label" data-for="actor : actors"
+				data-class-present="actor.state_class == 'present'" data-class-unstable="actor.state_class == 'unstable'"
+				data-class-away="actor.state_class == 'away'" data-class-returning="actor.state_class == 'returning'"
+				data-class-lost="actor.state_class == 'lost'"
+				data-style-left="actor.label_left" data-style-top="actor.label_top">{{actor.label}}</div>
+			<div id="preview-hint">ドラッグ: 移動　ホイール: 拡大縮小</div>
+		</div>
+	</div>
+
+	<!-- ===== 右：ルック ===== -->
+	<div id="look" class="panel">
+		<div class="panel-title">ルック</div>
+		<div class="panel-body">
+			<label class="check"><input type="checkbox" data-checked="host_lock"/> ホストロック</label>
+			<span class="muted">（参加者はルックを変更できない）</span>
+
+			<div class="section">プリセット</div>
+			<div class="button-row">
+				<button class="third" data-for="name, i : presets" data-class-active="preset == i" data-event-click="set_preset(i)">{{name}}</button>
+			</div>
+
+			<div class="section">基本</div>
+			<div class="slider-row">
+				<span class="label">明るさ</span>
+				<input type="range" min="-1" max="1" step="0.01" data-value="brightness" data-event-change="look_changed"/>
+				<span class="value">{{brightness | format(2)}}</span>
+			</div>
+			<div class="slider-row">
+				<span class="label">暖かさ</span>
+				<input type="range" min="-1" max="1" step="0.01" data-value="warmth" data-event-change="look_changed"/>
+				<span class="value">{{warmth | format(2)}}</span>
+			</div>
+			<div class="slider-row">
+				<span class="label">ムード</span>
+				<input type="range" min="0" max="1" step="0.01" data-value="mood" data-event-change="look_changed"/>
+				<span class="value">{{mood | format(2)}}</span>
+			</div>
+			<div class="button-row">
+				<button data-event-click="normalize">見た目を揃える</button>
+				<button data-if="normalized" data-event-click="reset_normalize">解除</button>
+				<span data-if="normalized" class="muted">補正中</span>
+			</div>
+
+			<div class="section foldable" data-event-click="toggle_detail">{{detail_open ? '▼' : '▶'}} 詳細</div>
+			<div data-if="detail_open">
+				<div class="sub">光源</div>
+				<div class="slider-row">
+					<span class="label">向き</span>
+					<input type="range" min="0" max="360" step="1" data-value="light_angle" data-event-change="look_changed"/>
+					<span class="value">{{light_angle | format(0)}} 度</span>
+				</div>
+				<div class="slider-row">
+					<span class="label">擬似ライト</span>
+					<input type="range" min="0" max="1" step="0.01" data-value="light_strength" data-event-change="look_changed"/>
+					<span class="value">{{light_strength | format(2)}}</span>
+				</div>
+
+				<div class="sub">影</div>
+				<div class="slider-row">
+					<span class="label">濃さ</span>
+					<input type="range" min="0" max="1" step="0.01" data-value="shadow_strength" data-event-change="look_changed"/>
+					<span class="value">{{shadow_strength | format(2)}}</span>
+				</div>
+				<div class="slider-row">
+					<span class="label">距離</span>
+					<input type="range" min="0" max="0.06" step="0.001" data-value="shadow_distance" data-event-change="look_changed"/>
+					<span class="value">{{shadow_distance | format(3)}}</span>
+				</div>
+
+				<div class="sub">リムライト</div>
+				<div class="slider-row">
+					<span class="label">強さ</span>
+					<input type="range" min="0" max="1" step="0.01" data-value="rim_strength" data-event-change="look_changed"/>
+					<span class="value">{{rim_strength | format(2)}}</span>
+				</div>
+				<div class="slider-row">
+					<span class="label">幅</span>
+					<input type="range" min="1" max="10" step="0.1" data-value="rim_width" data-event-change="look_changed"/>
+					<span class="value">{{rim_width | format(1)}} px</span>
+				</div>
+				<div class="slider-row">
+					<span class="label">色 R</span>
+					<input type="range" min="0" max="1" step="0.01" data-value="rim_r" data-event-change="look_changed"/>
+					<span class="value">{{rim_r | format(2)}}</span>
+				</div>
+				<div class="slider-row">
+					<span class="label">色 G</span>
+					<input type="range" min="0" max="1" step="0.01" data-value="rim_g" data-event-change="look_changed"/>
+					<span class="value">{{rim_g | format(2)}}</span>
+				</div>
+				<div class="slider-row">
+					<span class="label">色 B</span>
+					<input type="range" min="0" max="1" step="0.01" data-value="rim_b" data-event-change="look_changed"/>
+					<span class="value">{{rim_b | format(2)}}</span>
+				</div>
+
+				<div class="sub">ブルーム</div>
+				<div class="slider-row">
+					<span class="label">しきい値</span>
+					<input type="range" min="0.3" max="1" step="0.01" data-value="bloom_threshold" data-event-change="look_changed"/>
+					<span class="value">{{bloom_threshold | format(2)}}</span>
+				</div>
+				<div class="slider-row">
+					<span class="label">強さ</span>
+					<input type="range" min="0" max="1.5" step="0.01" data-value="bloom_intensity" data-event-change="look_changed"/>
+					<span class="value">{{bloom_intensity | format(2)}}</span>
+				</div>
+
+				<div class="sub">LUT</div>
+				<div class="button-row">
+					<button class="small" data-for="name, i : luts" data-class-active="lut == i" data-event-click="set_lut(i)">{{name}}</button>
+				</div>
+				<div class="slider-row">
+					<span class="label">強さ</span>
+					<input type="range" min="0" max="1" step="0.01" data-value="lut_strength" data-event-change="look_changed"/>
+					<span class="value">{{lut_strength | format(2)}}</span>
+				</div>
+
+				<div class="sub">ビネット</div>
+				<div class="slider-row">
+					<span class="label">強さ</span>
+					<input type="range" min="0" max="1" step="0.01" data-value="vignette" data-event-change="look_changed"/>
+					<span class="value">{{vignette | format(2)}}</span>
+				</div>
+			</div>
+
+			<div class="section">ホットキー（配信中も有効）</div>
+			<div class="hotkey"><span class="key">{{hotkey_blackout}}</span> 暗転 <span data-if="!hotkey_blackout_ok" class="warn">（他のアプリが使用中）</span></div>
+			<div class="hotkey"><span class="key">{{hotkey_spotlight}}</span> スポットライト <span data-if="!hotkey_spotlight_ok" class="warn">（他のアプリが使用中）</span></div>
+			<div class="hotkey"><span class="key">{{hotkey_away}}</span> 自分を離席 <span data-if="!hotkey_away_ok" class="warn">（他のアプリが使用中）</span></div>
+		</div>
+	</div>
+</body>
+</rml>

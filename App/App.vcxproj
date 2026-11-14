@@ -69,7 +69,10 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="UserMacros">
+    <!-- RmlUi は vcpkg（x64-windows）から使う。別の場所なら MSBuild のプロパティ CoStageVcpkgDir で上書きする -->
+    <CoStageVcpkgDir Condition="'$(CoStageVcpkgDir)'==''">F:\vcpkg\installed\x64-windows</CoStageVcpkgDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -111,14 +114,18 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Framework\src;$(ProjectDir)Core\include;$(ProjectDir)Cubism;$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Framework\src;$(ProjectDir)Core\include;$(ProjectDir)Cubism;$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;$(CoStageVcpkgDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ProjectDir)Core\lib\windows\x86_64\143;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Live2DCubismCore_MDd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)Core\lib\windows\x86_64\143;$(CoStageVcpkgDir)\debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Live2DCubismCore_MDd.lib;rmlui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d /q "$(CoStageVcpkgDir)\debug\bin\rmlui.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\debug\bin\brotlicommon.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\debug\bin\brotlidec.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\debug\bin\brotlienc.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\debug\bin\freetyped.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\debug\bin\libpng16d.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\debug\bin\bz2d.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\debug\bin\zd.dll" "$(OutDir)" &gt;nul</Command>
+      <Message>RmlUi の DLL を出力フォルダーにコピー</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -129,25 +136,31 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)Framework\src;$(ProjectDir)Core\include;$(ProjectDir)Cubism;$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Framework\src;$(ProjectDir)Core\include;$(ProjectDir)Cubism;$(SolutionDir)ImGui\imgui;$(SolutionDir)ImGui\imgui\backends;$(CoStageVcpkgDir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(ProjectDir)Core\lib\windows\x86_64\143;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Live2DCubismCore_MD.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)Core\lib\windows\x86_64\143;$(CoStageVcpkgDir)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Live2DCubismCore_MD.lib;rmlui.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /y /d /q "$(CoStageVcpkgDir)\bin\rmlui.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\bin\brotlicommon.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\bin\brotlidec.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\bin\brotlienc.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\bin\freetype.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\bin\libpng16.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\bin\bz2.dll" "$(OutDir)" &gt;nul&#xD;&#xA;xcopy /y /d /q "$(CoStageVcpkgDir)\bin\z.dll" "$(OutDir)" &gt;nul</Command>
+      <Message>RmlUi の DLL を出力フォルダーにコピー</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Stage\StageView.cpp" />
+    <ClCompile Include="UI\RmlRenderer_D3D12.cpp" />
+    <ClCompile Include="UI\RmlUiLayer.cpp" />
     <ClCompile Include="Stage\StageLook.cpp" />
     <ClCompile Include="Stage\PresenceStateMachine.cpp" />
     <ClCompile Include="Stage\StageRenderer.cpp" />
     <ClCompile Include="Stage\OutputWindow.cpp" />
     <ClCompile Include="Stage\Stage.cpp" />
-    <ClCompile Include="Stage\StageUI.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FloorGrid.cpp" />
     <ClCompile Include="Cubism\CubismRenderer_D3D12.cpp" />
@@ -217,12 +230,16 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Scene.h" />
+    <None Include="UI\stage.rml" />
+    <None Include="UI\stage.rcss" />
+    <ClInclude Include="Stage\StageView.h" />
+    <ClInclude Include="UI\RmlRenderer_D3D12.h" />
+    <ClInclude Include="UI\RmlUiLayer.h" />
     <ClInclude Include="Stage\StageLook.h" />
     <ClInclude Include="Stage\PresenceStateMachine.h" />
     <ClInclude Include="Stage\StageRenderer.h" />
     <ClInclude Include="Stage\OutputWindow.h" />
     <ClInclude Include="Stage\Stage.h" />
-    <ClInclude Include="Stage\StageUI.h" />
     <ClInclude Include="Cubism\Live2DLook.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FloorGrid.h" />

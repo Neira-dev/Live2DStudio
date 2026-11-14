@@ -2,7 +2,7 @@
 #include "Cubism/Live2D.h"
 #include "Stage/Stage.h"
 #include "Stage/OutputWindow.h"
-#include "Stage/StageUI.h"
+#include "Stage/StageView.h"
 #include "../DirectX12/DX12Device.h"
 #include "../DirectX12/DX12CommandQueue.h"
 #include "../DirectX12/DX12Renderer.h"
@@ -16,15 +16,11 @@ Scene::~Scene()
 	UnInit();
 }
 
-void Scene::Init(DX12Device* device, DX12CommandQueue* commandQueue, DX12Renderer* renderer)
+void Scene::Init(DX12Device* device, DX12CommandQueue* commandQueue, DX12Renderer* renderer, Rml::Context* uiContext)
 {
 	// シーンの初期化処理
 	_commandQueue = commandQueue;
 	_renderer = renderer;
-
-	// UI（日本語フォントは最初のフレームより前に読み込む）
-	_ui = std::make_unique<StageUI>();
-	_ui->Initialize();
 
 	// Live2D の初期化（Cubism Framework と描画用の共通リソース）
 	_live2dStarted = Live2D::StartUp(device, commandQueue, renderer);
@@ -34,10 +30,10 @@ void Scene::Init(DX12Device* device, DX12CommandQueue* commandQueue, DX12Rendere
 		if (_stage->Initialize(device->GetDevice(), commandQueue))
 		{
 			// 最初は Live2D フォルダーのモデルを2体まで並べる（作業ディレクトリ = App フォルダー）
-			const auto models = StageUI::FindModels("Live2D");
+			const auto models = StageView::FindModels("Live2D");
 			for (size_t i = 0; i < (std::min)(models.size(), static_cast<size_t>(2)); ++i)
 			{
-				_stage->AddActor(models[i], StageUI::ToUtf8(models[i].filename()));
+				_stage->AddActor(models[i], StageView::ToUtf8(models[i].filename()));
 			}
 		}
 		else
@@ -66,6 +62,16 @@ void Scene::Init(DX12Device* device, DX12CommandQueue* commandQueue, DX12Rendere
 	_output.reset();
 	}
 
+	// ステージ画面の UI（RmlUi）
+	if (_stage && uiContext != nullptr)
+	{
+		_view = std::make_unique<StageView>();
+		if (!_view->Initialize(uiContext, *_stage, _output.get()))
+		{
+			_view.reset();
+		}
+	}
+
 	_prevTime = std::chrono::steady_clock::now();
 }
 
@@ -86,12 +92,16 @@ void Scene::Update()
 	{
 		_stage->Update(deltaSeconds);
 	}
+	if (_view)
+	{
+		_view->Update();
+	}
 }
 
 void Scene::Draw(ID3D12GraphicsCommandList* commandList)
 {
 	// シーンの描画処理
-	if (!_stage || !_ui)
+	if (!_stage || !_view)
 	{
 		return;
 	}
@@ -110,10 +120,12 @@ void Scene::Draw(ID3D12GraphicsCommandList* commandList)
 		_output->EndFrame(commandList);
 	}
 
-	// 3. メイン画面のプレビュー
+	// 3. メイン画面のプレビュー（欄全体を背景色で塗ってから、16:9 の範囲に描く）
 	float background[3];
-	_ui->GetPreviewBackground(background);
-	_stage->Composite(commandList, _renderer->GetCurrentRTV(), _ui->GetPreviewViewport(), _ui->GetPreviewScissor(), background);
+	_view->GetPreviewBackground(background);
+	const float areaColor[4] = { 0.07f, 0.08f, 0.10f, 1.0f };
+	commandList->ClearRenderTargetView(_renderer->GetCurrentRTV(), areaColor, 1, &_view->GetPreviewArea());
+	_stage->Composite(commandList, _renderer->GetCurrentRTV(), _view->GetPreviewViewport(), _view->GetPreviewScissor(), background);
 
 	// ImGui 用に描画先を戻す
 	const D3D12_CPU_DESCRIPTOR_HANDLE rtv = _renderer->GetCurrentRTV();
@@ -121,15 +133,6 @@ void Scene::Draw(ID3D12GraphicsCommandList* commandList)
 	commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
 	commandList->RSSetViewports(1, &_renderer->GetViewport());
 	commandList->RSSetScissorRects(1, &_renderer->GetScissorRect());
-}
-
-void Scene::DrawImGui()
-{
-	// ImGuiの描画処理
-	if (_stage && _ui && _output)
-	{
-		_ui->Draw(*_stage, *_output);
-	}
 }
 
 void Scene::PresentOutput()
@@ -148,9 +151,9 @@ void Scene::UnInit()
 	{
 		_commandQueue->Flush();
 	}
+	_view.reset();
 	_stage.reset();
 	_output.reset();
-	_ui.reset();
 	if (_live2dStarted)
 	{
 		Live2D::Shutdown();

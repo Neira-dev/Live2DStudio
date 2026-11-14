@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="UI">
+      <UniqueIdentifier>{9b0c7d3e-2a61-4c4f-8e1d-5f3a7b2c9d40}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Stage">
       <UniqueIdentifier>{6c1e2a54-4f3b-4b8e-9a51-2d7f3c9e0b11}</UniqueIdentifier>
     </Filter>
@@ -74,8 +77,14 @@
     <ClCompile Include="Stage\Stage.cpp">
       <Filter>Stage</Filter>
     </ClCompile>
-    <ClCompile Include="Stage\StageUI.cpp">
+    <ClCompile Include="Stage\StageView.cpp">
       <Filter>Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\RmlRenderer_D3D12.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\RmlUiLayer.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>ソース ファイル</Filter>
@@ -262,12 +271,24 @@
     <ClInclude Include="Stage\Stage.h">
       <Filter>Stage</Filter>
     </ClInclude>
-    <ClInclude Include="Stage\StageUI.h">
-      <Filter>Stage</Filter>
-    </ClInclude>
     <ClInclude Include="Cubism\Live2DLook.h">
       <Filter>Live2D</Filter>
     </ClInclude>
+    <ClInclude Include="Stage\StageView.h">
+      <Filter>Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\RmlRenderer_D3D12.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\RmlUiLayer.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <None Include="UI\stage.rml">
+      <Filter>UI</Filter>
+    </None>
+    <None Include="UI\stage.rcss">
+      <Filter>UI</Filter>
+    </None>
     <ClInclude Include="Scene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

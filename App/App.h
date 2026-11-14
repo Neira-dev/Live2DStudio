@@ -7,7 +7,7 @@ class DX12Device;
 class DX12CommandQueue;
 class DX12SwapChain;
 class DX12Renderer;
-class ImGuiLayer;
+class RmlUiLayer;
 class Scene;
 
 class App
@@ -27,7 +27,7 @@ private:
 	std::unique_ptr<DX12CommandQueue> _commandQueue;
 	std::unique_ptr<DX12SwapChain> _swapChain;
 	std::unique_ptr<DX12Renderer> _renderer;
-	std::unique_ptr<ImGuiLayer> _gui;
+	std::unique_ptr<RmlUiLayer> _ui;
 	std::unique_ptr<Scene> _scene;
 };
 
