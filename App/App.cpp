@@ -116,6 +116,9 @@ void App::Draw()
 	_gui->EndFrame(_renderer->GetCommandList());
 
 	_renderer->EndFrame();
+
+	// 出力ウィンドウ（OBS 取り込み用）を表示
+	_scene->PresentOutput();
 }
 
 void App::UnInit()

@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <cmath>
 #include <cstring>
 #include <fstream>
 #include <map>
@@ -44,6 +45,7 @@ namespace
 using namespace Live2D::Cubism::Framework;
 using Live2D::Cubism::Framework::Rendering::CubismRenderer_D3D12;
 using Live2D::Cubism::Framework::Rendering::CubismRenderTargetBinding_D3D12;
+using Live2D::Cubism::Framework::Rendering::CubismActorLook_D3D12;
 
 // ============================================================================
 // 文字列・ファイル
@@ -742,6 +744,53 @@ public:
 		}
 		renderer->SetMvpMatrix(&projection);
 
+		// モデルを囲む範囲を画面（NDC）に変換する（擬似ライトの基準と、ドラッグの当たり判定に使う）
+		{
+			const csmFloat32* m = projection.GetArray();
+			const float corners[4][2] =
+			{
+				{ _bounds[0], _bounds[2] }, { _bounds[1], _bounds[2] },
+				{ _bounds[0], _bounds[3] }, { _bounds[1], _bounds[3] },
+			};
+			float minX = FLT_MAX, maxX = -FLT_MAX, minY = FLT_MAX, maxY = -FLT_MAX;
+			for (const auto& c : corners)
+			{
+				const float x = m[0] * c[0] + m[4] * c[1] + m[12];
+				const float y = m[1] * c[0] + m[5] * c[1] + m[13];
+				const float w = m[3] * c[0] + m[7] * c[1] + m[15];
+				const float invW = (std::fabs(w) > 1e-6f) ? 1.0f / w : 1.0f;
+				minX = (std::min)(minX, x * invW);
+				maxX = (std::max)(maxX, x * invW);
+				minY = (std::min)(minY, y * invW);
+				maxY = (std::max)(maxY, y * invW);
+			}
+			_screenBounds[0] = minX;
+			_screenBounds[1] = maxX;
+			_screenBounds[2] = minY;
+			_screenBounds[3] = maxY;
+			_hasScreenBounds = true;
+		}
+
+		CubismActorLook_D3D12 look;
+		look.tint[0] = _look.tint[0];
+		look.tint[1] = _look.tint[1];
+		look.tint[2] = _look.tint[2];
+		look.tint[3] = _look.saturation;
+		look.light[0] = _look.lightDirection[0];
+		look.light[1] = _look.lightDirection[1];
+		look.light[2] = _look.lightStrength;
+		look.light[3] = _look.opacity;
+		look.rim[0] = _look.rimColor[0];
+		look.rim[1] = _look.rimColor[1];
+		look.rim[2] = _look.rimColor[2];
+		look.rim[3] = _look.rimStrength;
+		look.extra[0] = _look.rimWidth;
+		look.bounds[0] = (_screenBounds[0] + _screenBounds[1]) * 0.5f;
+		look.bounds[1] = (_screenBounds[2] + _screenBounds[3]) * 0.5f;
+		look.bounds[2] = (_screenBounds[1] - _screenBounds[0]) * 0.5f;
+		look.bounds[3] = (_screenBounds[3] - _screenBounds[2]) * 0.5f;
+		renderer->SetActorLook(look);
+
 		CubismRenderTargetBinding_D3D12 binding;
 		binding.rtv = target.rtv;
 		binding.dsv = target.dsv;
@@ -778,6 +827,27 @@ public:
 		right = _bounds[1];
 		bottom = _bounds[2];
 		top = _bounds[3];
+	}
+
+	void SetActorLook(const Live2DActorLook& look) override
+	{
+		_look = look;
+	}
+
+	bool GetScreenBounds(float& left, float& right, float& bottom, float& top) const override
+	{
+		left = _screenBounds[0];
+		right = _screenBounds[1];
+		bottom = _screenBounds[2];
+		top = _screenBounds[3];
+		return _hasScreenBounds;
+	}
+
+	void GetAverageColor(float rgb[3]) const override
+	{
+		rgb[0] = _averageColor[0];
+		rgb[1] = _averageColor[1];
+		rgb[2] = _averageColor[2];
 	}
 
 	bool IsLoaded() const override
@@ -861,6 +931,7 @@ private:
 		}
 
 		_textures.resize(textureCount);
+		double sum[4] = {};  // 平均色（乗算済みアルファのまま足し、最後に a で割る）
 		for (csmInt32 i = 0; i < textureCount; ++i)
 		{
 			const csmChar* fileName = _setting->GetTextureFileName(i);
@@ -874,6 +945,23 @@ private:
 			{
 				continue;
 			}
+
+			// 4 ピクセルおきに見れば十分
+			for (size_t p = 0; p + 3 < image.pixels.size(); p += 16)
+			{
+				sum[0] += image.pixels[p + 0];
+				sum[1] += image.pixels[p + 1];
+				sum[2] += image.pixels[p + 2];
+				sum[3] += image.pixels[p + 3];
+			}
+			if (sum[3] > 0.0)
+			{
+				for (int c = 0; c < 3; ++c)
+				{
+					_averageColor[c] = static_cast<float>(sum[c] / sum[3]);
+				}
+			}
+
 			if (!uploader.CreateTexture(image, _textures[i]))
 			{
 				continue;
@@ -903,6 +991,12 @@ private:
 	bool _use3D = false;
 	csmFloat32 _worldViewProjection[16] = {};
 	float _bounds[4] = { -1.0f, 1.0f, -1.0f, 1.0f };  // left, right, bottom, top（モデルの座標）
+
+	// ライティング
+	Live2DActorLook _look;
+	float _screenBounds[4] = { -1.0f, 1.0f, -1.0f, 1.0f };  // 最後に描いたときの範囲（NDC）
+	bool _hasScreenBounds = false;
+	float _averageColor[3] = { 0.5f, 0.5f, 0.5f };
 };
 
 } // namespace

@@ -20,6 +20,8 @@
 #include <filesystem>
 #include <memory>
 
+#include "Live2DModel.h"  // Live2DRenderTarget, Live2DActorLook（Cubism SDK には依存しない）
+
 class DX12Device;
 class DX12CommandQueue;
 class DX12Renderer;
@@ -79,6 +81,28 @@ public:
 	 * @param commandList DX12Renderer::GetCommandList() のコマンドリスト
 	 */
 	void Draw(ID3D12GraphicsCommandList* commandList);
+
+	/**
+	 * @brief 指定した描画先（オフスクリーンなど）に描画する
+	 * @param target 描画先。フォーマットは R8G8B8A8_UNORM、深度は D32_FLOAT（同じ大きさ）
+	 */
+	void Draw(ID3D12GraphicsCommandList* commandList, const Live2DRenderTarget& target);
+
+	/**
+	 * @brief Actor Pass（モデルごとのライティング）を設定する
+	 */
+	void SetActorLook(const Live2DActorLook& look);
+
+	/**
+	 * @brief 最後に描いたときの、モデルを囲む範囲（NDC、Y は上向き）
+	 * @return まだ描いていなければ false
+	 */
+	bool GetScreenBounds(float& left, float& right, float& bottom, float& top) const;
+
+	/**
+	 * @brief テクスチャの平均色（0〜1）
+	 */
+	void GetAverageColor(float rgb[3]) const;
 
 	/**
 	 * @brief 表示位置（画面中央が 0,0。上下の端が ±1）

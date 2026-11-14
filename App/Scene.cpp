@@ -1,13 +1,13 @@
 #include "Scene.h"
 #include "Cubism/Live2D.h"
-#include "imgui.h"
-#include "Camera.h"
-#include "FloorGrid.h"
+#include "Stage/Stage.h"
+#include "Stage/OutputWindow.h"
+#include "Stage/StageUI.h"
 #include "../DirectX12/DX12Device.h"
 #include "../DirectX12/DX12CommandQueue.h"
 #include "../DirectX12/DX12Renderer.h"
 
-#include <cmath>
+#include <algorithm>
 
 Scene::Scene() = default;
 
@@ -22,30 +22,48 @@ void Scene::Init(DX12Device* device, DX12CommandQueue* commandQueue, DX12Rendere
 	_commandQueue = commandQueue;
 	_renderer = renderer;
 
-	// 3D 表示用のカメラと床のグリッド
-	_camera = std::make_unique<Camera>();
-	_grid = std::make_unique<FloorGrid>();
-	FloorGrid::Desc gridDesc;
-	gridDesc.device = device->GetDevice();
-	gridDesc.depthStencilFormat = DX12Renderer::GetDepthStencilFormat();
-	if (!_grid->Initialize(gridDesc))
-	{
-		_grid.reset();
-	}
+	// UI（日本語フォントは最初のフレームより前に読み込む）
+	_ui = std::make_unique<StageUI>();
+	_ui->Initialize();
 
 	// Live2D の初期化（Cubism Framework と描画用の共通リソース）
 	_live2dStarted = Live2D::StartUp(device, commandQueue, renderer);
 	if (_live2dStarted)
 	{
-		// モデルの読み込み（作業ディレクトリ = App フォルダーからの相対パス）
-		_live2d = std::make_unique<Live2D>();
-		_live2d->SetCamera(_use3D ? _camera.get() : nullptr);
-		if (_live2d->Load(L"Live2D/vampire_white"))
+		_stage = std::make_unique<Stage>();
+		if (_stage->Initialize(device->GetDevice(), commandQueue))
 		{
-			// 待機モーションをループ再生
-			_live2d->PlayMotion(L"Live2D/vampire_white/animation/key01.exp3.json", true);
-
+			// 最初は Live2D フォルダーのモデルを2体まで並べる（作業ディレクトリ = App フォルダー）
+			const auto models = StageUI::FindModels("Live2D");
+			for (size_t i = 0; i < (std::min)(models.size(), static_cast<size_t>(2)); ++i)
+			{
+				_stage->AddActor(models[i], StageUI::ToUtf8(models[i].filename()));
+			}
 		}
+		else
+		{
+	_stage.reset();
+		}
+	}
+
+	// 出力ウィンドウ（OBS で取り込む）とホットキー
+	_output = std::make_unique<OutputWindow>();
+	if (!_output->Initialize(device, commandQueue, [this](StageHotkey hotkey)
+	{
+		if (!_stage)
+		{
+			return;
+		}
+		switch (hotkey)
+		{
+		case StageHotkey::Blackout: _stage->ToggleBlackout(); break;
+		case StageHotkey::Spotlight: _stage->ToggleSpotlight(); break;
+		case StageHotkey::ManualAway: _stage->ToggleManualAway(); break;
+		default: break;
+		}
+	}))
+	{
+	_output.reset();
 	}
 
 	_prevTime = std::chrono::steady_clock::now();
@@ -64,119 +82,61 @@ void Scene::Update()
 		deltaSeconds = 0.1f;
 	}
 
-	if (_live2d)
+	if (_stage)
 	{
-		_live2d->Update(deltaSeconds);
+		_stage->Update(deltaSeconds);
 	}
 }
 
 void Scene::Draw(ID3D12GraphicsCommandList* commandList)
 {
 	// シーンの描画処理
-	if (_use3D && _grid && _camera && _renderer)
+	if (!_stage || !_ui)
 	{
-		const D3D12_VIEWPORT& viewport = _renderer->GetViewport();
-		const float aspect = viewport.Height > 0.0f ? viewport.Width / viewport.Height : 1.0f;
-		_grid->Draw(commandList, _camera->GetViewProjection(aspect), _camera->GetPosition());
+		return;
 	}
 
-	if (_live2d)
+	// 1. 参加者をステージ用テクスチャに描く
+	_stage->Render(commandList);
+
+	// 2. 出力ウィンドウ（クロマキーの緑背景、1920x1080）
+	if (_output && _output->IsVisible())
 	{
-		_live2d->Draw(commandList);
+		const float chroma[3] = { 0.0f, 1.0f, 0.0f };
+		const D3D12_CPU_DESCRIPTOR_HANDLE rtv = _output->BeginFrame(commandList);
+		const D3D12_VIEWPORT viewport = { 0.0f, 0.0f, static_cast<float>(OutputWindow::Width), static_cast<float>(OutputWindow::Height), 0.0f, 1.0f };
+		const D3D12_RECT scissor = { 0, 0, static_cast<LONG>(OutputWindow::Width), static_cast<LONG>(OutputWindow::Height) };
+		_stage->Composite(commandList, rtv, viewport, scissor, chroma);
+		_output->EndFrame(commandList);
 	}
+
+	// 3. メイン画面のプレビュー
+	float background[3];
+	_ui->GetPreviewBackground(background);
+	_stage->Composite(commandList, _renderer->GetCurrentRTV(), _ui->GetPreviewViewport(), _ui->GetPreviewScissor(), background);
+
+	// ImGui 用に描画先を戻す
+	const D3D12_CPU_DESCRIPTOR_HANDLE rtv = _renderer->GetCurrentRTV();
+	const D3D12_CPU_DESCRIPTOR_HANDLE dsv = _renderer->GetDSV();
+	commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+	commandList->RSSetViewports(1, &_renderer->GetViewport());
+	commandList->RSSetScissorRects(1, &_renderer->GetScissorRect());
 }
 
 void Scene::DrawImGui()
 {
 	// ImGuiの描画処理
-	ImGui::Begin("Live2D");
-	static float scale = 1.0f;
-	static float PosX = 0.0f;
-	static float PosY = 0.0f;
-
-	if (ImGui::DragFloat("Scale", &scale, 0.1f, 3.0f))
+	if (_stage && _ui && _output)
 	{
-		if (_live2d)
-		{
-			_live2d->SetScale(scale);
-		}
+		_ui->Draw(*_stage, *_output);
 	}
+}
 
-	if (ImGui::DragFloat("PosX", &PosX, -1.0f, 1.0f))
+void Scene::PresentOutput()
+{
+	if (_output)
 	{
-		if (_live2d)
-		{
-			_live2d->SetPosition(PosX, PosY);
-		}
-	}
-
-	if (ImGui::DragFloat("PosY", &PosY))
-	{
-		if (_live2d)
-		{
-			_live2d->SetPosition(PosX, PosY);
-		}
-	}
-
-
-	// 3D 空間への配置
-	ImGui::Separator();
-	if (ImGui::Checkbox("3D", &_use3D) && _live2d)
-	{
-		_live2d->SetCamera(_use3D ? _camera.get() : nullptr);
-	}
-	if (_use3D && _camera)
-	{
-		static bool billboard = true;
-		static float rotationY = 0.0f;
-		static float worldPosition[3] = { 0.0f, 0.0f, 0.0f };
-		static float worldHeight = 1.6f;
-		if (ImGui::Checkbox("Billboard", &billboard) && _live2d)
-		{
-			_live2d->SetBillboard(billboard);
-		}
-		if (!billboard && ImGui::SliderFloat("Rotation Y", &rotationY, -180.0f, 180.0f) && _live2d)
-		{
-			_live2d->SetWorldRotationY(rotationY);
-		}
-		if (ImGui::DragFloat3("World Pos", worldPosition, 0.01f) && _live2d)
-		{
-			_live2d->SetWorldPosition(worldPosition[0], worldPosition[1], worldPosition[2]);
-		}
-		if (ImGui::DragFloat("Height", &worldHeight, 0.01f, 0.1f, 10.0f) && _live2d)
-		{
-			_live2d->SetWorldHeight(worldHeight);
-		}
-		if (ImGui::Button("Reset Camera"))
-		{
-			_camera->Reset();
-		}
-		ImGui::TextUnformatted("L-drag: rotate  R-drag: move  Wheel: zoom");
-	}
-
-	ImGui::End();
-
-	// カメラ操作（ImGui のウィンドウ上でないときだけ）
-	if (_use3D && _camera)
-	{
-		ImGuiIO& io = ImGui::GetIO();
-		if (!io.WantCaptureMouse)
-		{
-			if (ImGui::IsMouseDragging(ImGuiMouseButton_Left, 0.0f))
-			{
-				_camera->Orbit(-io.MouseDelta.x * 0.005f, io.MouseDelta.y * 0.005f);
-			}
-			if (ImGui::IsMouseDragging(ImGuiMouseButton_Right, 0.0f) && io.DisplaySize.y > 0.0f)
-			{
-				// 1 ピクセルの移動が、注視点の距離で何 m に当たるか
-				const float perPixel = 2.0f * std::tan(_camera->GetFovY() * 0.5f) / io.DisplaySize.y;
-				_camera->Pan(-io.MouseDelta.x * perPixel, io.MouseDelta.y * perPixel);
-			}
-			if (io.MouseWheel != 0.0f)
-			{
-				_camera->Zoom(std::pow(0.9f, io.MouseWheel));
-			}
-		}
+		_output->Present();
 	}
 }
 
@@ -188,12 +148,13 @@ void Scene::UnInit()
 	{
 		_commandQueue->Flush();
 	}
-	_live2d.reset();
-	_grid.reset();
-	_camera.reset();
+	_stage.reset();
+	_output.reset();
+	_ui.reset();
 	if (_live2dStarted)
 	{
 		Live2D::Shutdown();
 		_live2dStarted = false;
 	}
+	_commandQueue = nullptr;
 }

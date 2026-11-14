@@ -11,6 +11,8 @@
 #include <filesystem>
 #include <memory>
 
+#include "Live2DLook.h"
+
 /**
  * @brief モデルの描画先
  */
@@ -93,5 +95,21 @@ public:
 	 * @brief 読み込み時のポーズでの、全パーツを囲む範囲（モデルの座標、Y は上向き）
 	 */
 	virtual void GetModelBounds(float& left, float& right, float& bottom, float& top) const = 0;
+
+	/**
+	 * @brief Actor Pass（モデルごとのライティング）を設定する
+	 */
+	virtual void SetActorLook(const Live2DActorLook& look) = 0;
+
+	/**
+	 * @brief 最後に描いたときの、モデルを囲む範囲（NDC、Y は上向き）
+	 * @return まだ描いていなければ false
+	 */
+	virtual bool GetScreenBounds(float& left, float& right, float& bottom, float& top) const = 0;
+
+	/**
+	 * @brief テクスチャの平均色（不透明な所の平均、0〜1）。「見た目を揃える」に使う
+	 */
+	virtual void GetAverageColor(float rgb[3]) const = 0;
 	virtual bool IsLoaded() const = 0;
 };

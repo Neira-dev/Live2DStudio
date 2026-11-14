@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Stage">
+      <UniqueIdentifier>{6c1e2a54-4f3b-4b8e-9a51-2d7f3c9e0b11}</UniqueIdentifier>
+    </Filter>
     <Filter Include="ソース ファイル">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
@@ -55,6 +58,24 @@
     </ClCompile>
     <ClCompile Include="App.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage\StageLook.cpp">
+      <Filter>Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage\PresenceStateMachine.cpp">
+      <Filter>Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage\StageRenderer.cpp">
+      <Filter>Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage\OutputWindow.cpp">
+      <Filter>Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage\Stage.cpp">
+      <Filter>Stage</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage\StageUI.cpp">
+      <Filter>Stage</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>ソース ファイル</Filter>
@@ -225,6 +246,27 @@
   <ItemGroup>
     <ClInclude Include="App.h">
       <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage\StageLook.h">
+      <Filter>Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage\PresenceStateMachine.h">
+      <Filter>Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage\StageRenderer.h">
+      <Filter>Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage\OutputWindow.h">
+      <Filter>Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage\Stage.h">
+      <Filter>Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage\StageUI.h">
+      <Filter>Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="Cubism\Live2DLook.h">
+      <Filter>Live2D</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>ヘッダー ファイル</Filter>

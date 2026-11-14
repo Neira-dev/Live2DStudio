@@ -39,6 +39,18 @@ struct CubismRenderTargetBinding_D3D12
 };
 
 /**
+ * @brief Actor Pass（モデルごとのライティング）の定数。HLSL の cbuffer と同じ並び
+ */
+struct CubismActorLook_D3D12
+{
+	float tint[4] = { 1.0f, 1.0f, 1.0f, 1.0f };    // rgb: 色の乗算, a: 彩度
+	float light[4] = { 0.0f, 1.0f, 0.0f, 1.0f };   // xy: 光の来る方向（画面、Y 上向き）, z: 擬似ライトの強さ, w: 不透明度
+	float rim[4] = { 1.0f, 1.0f, 1.0f, 0.0f };     // rgb: リムの色, a: 強さ
+	float extra[4] = { 3.0f, 0.0f, 0.0f, 0.0f };   // x: リムの幅（ピクセル）
+	float bounds[4] = { 0.0f, 0.0f, 1.0f, 1.0f };  // xy: モデルの中心（NDC）, zw: 半分の幅・高さ（NDC）
+};
+
+/**
  * @brief クリッピングマスク用のレンダーターゲット
  */
 class CubismMaskTarget_D3D12
@@ -155,6 +167,11 @@ public:
 	 */
 	void SetClippingMaskBufferSize(csmFloat32 width, csmFloat32 height);
 
+	/**
+	 * @brief Actor Pass（モデルごとのライティング）の値を設定する
+	 */
+	void SetActorLook(const CubismActorLook_D3D12& look) { _actorLook = look; }
+
 protected:
 	CubismRenderer_D3D12(csmUint32 width, csmUint32 height);
 	~CubismRenderer_D3D12() override;
@@ -193,6 +210,7 @@ private:
 
 	ID3D12GraphicsCommandList* _commandList = nullptr;
 	CubismRenderTargetBinding_D3D12 _mainTarget;
+	CubismActorLook_D3D12 _actorLook;
 
 	std::vector<D3D12_GPU_DESCRIPTOR_HANDLE> _textures;
 

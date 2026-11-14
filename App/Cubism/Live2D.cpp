@@ -84,7 +84,11 @@ void Live2D::Draw(ID3D12GraphicsCommandList* commandList)
 	target.hasDsv = true;
 	target.viewport = g_renderer->GetViewport();
 	target.scissor = g_renderer->GetScissorRect();
+	Draw(commandList, target);
+}
 
+void Live2D::Draw(ID3D12GraphicsCommandList* commandList, const Live2DRenderTarget& target)
+{
 	if (_camera != nullptr && target.viewport.Height > 0.0f)
 	{
 		using namespace DirectX;
@@ -124,6 +128,21 @@ void Live2D::Draw(ID3D12GraphicsCommandList* commandList)
 	}
 
 	_model->Draw(commandList, target);
+}
+
+void Live2D::SetActorLook(const Live2DActorLook& look)
+{
+	_model->SetActorLook(look);
+}
+
+bool Live2D::GetScreenBounds(float& left, float& right, float& bottom, float& top) const
+{
+	return _model->GetScreenBounds(left, right, bottom, top);
+}
+
+void Live2D::GetAverageColor(float rgb[3]) const
+{
+	_model->GetAverageColor(rgb);
 }
 
 void Live2D::SetWorldPosition(float x, float y, float z)

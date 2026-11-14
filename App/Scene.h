@@ -6,10 +6,14 @@
 class DX12Device;
 class DX12CommandQueue;
 class DX12Renderer;
-class Live2D;
-class Camera;
-class FloorGrid;
+class Stage;
+class OutputWindow;
+class StageUI;
 
+/*
+* Scene
+* CoStage のステージ画面（ステージ・出力ウィンドウ・UI をまとめる）
+*/
 class Scene
 {
 public:
@@ -20,18 +24,21 @@ public:
 	void Update();
 	void Draw(ID3D12GraphicsCommandList* commandList);
 	void DrawImGui();
+
+	/**
+	 * @brief 出力ウィンドウを表示する（DX12Renderer::EndFrame の後に呼ぶ）
+	 */
+	void PresentOutput();
+
 	void UnInit();
 
 private:
-	std::unique_ptr<Live2D> _live2d;
-
-	// 3D 表示
-	std::unique_ptr<Camera> _camera;
-	std::unique_ptr<FloorGrid> _grid;
-	bool _use3D = true;
+	std::unique_ptr<Stage> _stage;
+	std::unique_ptr<OutputWindow> _output;
+	std::unique_ptr<StageUI> _ui;
+	std::chrono::steady_clock::time_point _prevTime;
+	bool _live2dStarted = false;
 
 	DX12CommandQueue* _commandQueue = nullptr;
 	DX12Renderer* _renderer = nullptr;
-	std::chrono::steady_clock::time_point _prevTime;
-	bool _live2dStarted = false;
 };

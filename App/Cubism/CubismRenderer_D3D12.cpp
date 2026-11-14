@@ -55,6 +55,7 @@ struct ConstantBuffer
 	float multiplyColor[4];
 	float screenColor[4];
 	float channelFlag[4];
+	CubismActorLook_D3D12 look;
 };
 
 // ----------------------------------------------------------------------------
@@ -70,6 +71,13 @@ cbuffer CubismConstants : register(b0)
 	float4 multiplyColor;
 	float4 screenColor;
 	float4 channelFlag;
+
+	// Actor Pass（モデルごとのライティング）
+	float4 lookTint;    // rgb: 色の乗算, a: 彩度
+	float4 lookLight;   // xy: 光の来る方向（画面、Y 上向き）, z: 擬似ライトの強さ, w: 不透明度
+	float4 lookRim;     // rgb: リムの色, a: 強さ（0 で無効）
+	float4 lookExtra;   // x: リムの幅（ピクセル）
+	float4 lookBounds;  // xy: モデルの中心（NDC）, zw: 半分の幅・高さ（NDC）
 };
 
 Texture2D mainTexture : register(t0);
@@ -88,6 +96,7 @@ struct VSOutput
 	float4 position : SV_POSITION;
 	float2 uv : TEXCOORD0;
 	float4 clipPosition : TEXCOORD1;
+	float2 ndc : TEXCOORD2;
 };
 
 // ---- マスク生成 ----
@@ -98,6 +107,7 @@ VSOutput VSSetupMask(VSInput input)
 	o.position = pos;
 	o.clipPosition = pos;
 	o.uv = float2(input.uv.x, 1.0 - input.uv.y);
+	o.ndc = pos.xy / pos.w;
 	return o;
 }
 
@@ -117,11 +127,52 @@ VSOutput VSMain(VSInput input)
 	o.position = mul(projectMatrix, local);
 	o.clipPosition = mul(clipMatrix, local);
 	o.uv = float2(input.uv.x, 1.0 - input.uv.y);
+	o.ndc = o.position.xy / o.position.w;
 	return o;
+}
+
+// ---- Actor Pass ----
+// Cubism の乗算・スクリーン色とブレンドを壊さないよう、パーツの色を作った後に掛ける
+float4 ApplyActorLook(float4 color, float2 uv, float2 ndc, float2 duvdx, float2 duvdy)
+{
+	float3 rgb = color.rgb;
+
+	// 彩度と色味（明るさ・暖かさ・見た目を揃える補正）
+	float luminance = dot(rgb, float3(0.299, 0.587, 0.114));
+	rgb = lerp(luminance.xxx, rgb, lookTint.a) * lookTint.rgb;
+
+	// 擬似ライト：モデルの中心から見て、光の来る側を明るく、反対側を暗くする
+	if (lookLight.z > 0.0)
+	{
+		float2 rel = (ndc - lookBounds.xy) / max(lookBounds.zw, 1e-4);
+		float facing = saturate(0.5 + 0.5 * dot(rel, lookLight.xy));
+		rgb *= lerp(1.0 - 0.45 * lookLight.z, 1.0 + 0.25 * lookLight.z, facing);
+	}
+
+	// リムライト：光の来る方向へ少し進んだ所がパーツの外（透明）なら、光の当たる縁
+	if (lookRim.a > 0.0)
+	{
+		const int Steps = 3;
+		float2 toLight = float2(lookLight.x, -lookLight.y);  // 画面のピクセル座標は Y 下向き
+		float2 uvStep = (duvdx * toLight.x + duvdy * toLight.y) * lookExtra.x / Steps;
+		float rim = 0.0;
+		[unroll]
+		for (int k = Steps; k >= 1; --k)
+		{
+			float a = mainTexture.SampleGrad(mainSampler, uv + uvStep * k, duvdx, duvdy).a;
+			rim = (a < 0.3) ? (1.0 - (k - 1.0) / Steps) : rim;
+		}
+		rgb += lookRim.rgb * rim * lookRim.a * color.a;
+	}
+
+	color.rgb = rgb;
+	return color * lookLight.w;
 }
 
 float4 PSMain(VSOutput input) : SV_TARGET
 {
+	float2 duvdx = ddx(input.uv);
+	float2 duvdy = ddy(input.uv);
 	float4 texColor = mainTexture.Sample(mainSampler, input.uv);
 	texColor.rgb *= multiplyColor.rgb;
 #if PREMULTIPLIED_ALPHA
@@ -132,6 +183,8 @@ float4 PSMain(VSOutput input) : SV_TARGET
 	float4 color = texColor * baseColor;
 	color.rgb *= color.a;
 #endif
+
+	color = ApplyActorLook(color, input.uv, input.ndc, duvdx, duvdy);
 
 #if MASKED
 	float4 clipMask = (1.0 - maskTexture.Sample(maskSampler, input.clipPosition.xy / input.clipPosition.w)) * channelFlag;
@@ -1286,6 +1339,13 @@ void CubismRenderer_D3D12::DrawMesh(CubismModel& model, csmInt32 drawableIndex)
 		default:
 			blend = Blend_Normal;
 			break;
+		}
+
+		// Actor Pass。リムは通常ブレンドのパーツだけ（加算・乗算のパーツは光や影の表現なので除く）
+		cb.look = _actorLook;
+		if (blend != Blend_Normal)
+		{
+			cb.look.rim[3] = 0.0f;
 		}
 
 		const AlphaType alpha = IsPremultipliedAlpha() ? Alpha_Premultiplied : Alpha_Straight;

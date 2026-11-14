@@ -142,6 +142,12 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Stage\StageLook.cpp" />
+    <ClCompile Include="Stage\PresenceStateMachine.cpp" />
+    <ClCompile Include="Stage\StageRenderer.cpp" />
+    <ClCompile Include="Stage\OutputWindow.cpp" />
+    <ClCompile Include="Stage\Stage.cpp" />
+    <ClCompile Include="Stage\StageUI.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FloorGrid.cpp" />
     <ClCompile Include="Cubism\CubismRenderer_D3D12.cpp" />
@@ -211,6 +217,13 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Stage\StageLook.h" />
+    <ClInclude Include="Stage\PresenceStateMachine.h" />
+    <ClInclude Include="Stage\StageRenderer.h" />
+    <ClInclude Include="Stage\OutputWindow.h" />
+    <ClInclude Include="Stage\Stage.h" />
+    <ClInclude Include="Stage\StageUI.h" />
+    <ClInclude Include="Cubism\Live2DLook.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="FloorGrid.h" />
     <ClInclude Include="Core\include\Live2DCubismCore.h" />
