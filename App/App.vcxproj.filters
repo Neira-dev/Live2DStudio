@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Tracking">
+      <UniqueIdentifier>{3f7a1c22-8e4b-4d0a-b6c5-1e9d2a4f7c83}</UniqueIdentifier>
+    </Filter>
     <Filter Include="UI">
       <UniqueIdentifier>{9b0c7d3e-2a61-4c4f-8e1d-5f3a7b2c9d40}</UniqueIdentifier>
     </Filter>
@@ -88,6 +91,18 @@
     </ClCompile>
     <ClCompile Include="UI\RmlUiLayer.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Tracking\FaceTracker.cpp">
+      <Filter>Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="Tracking\CameraCapture.cpp">
+      <Filter>Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="Tracking\FaceTrackingService.cpp">
+      <Filter>Tracking</Filter>
+    </ClCompile>
+    <ClCompile Include="Tracking\TrackingMapper.cpp">
+      <Filter>Tracking</Filter>
     </ClCompile>
     <ClCompile Include="Scene.cpp">
       <Filter>ソース ファイル</Filter>
@@ -295,6 +310,18 @@
     <None Include="UI\stage.rcss">
       <Filter>UI</Filter>
     </None>
+    <ClInclude Include="Tracking\FaceTracker.h">
+      <Filter>Tracking</Filter>
+    </ClInclude>
+    <ClInclude Include="Tracking\CameraCapture.h">
+      <Filter>Tracking</Filter>
+    </ClInclude>
+    <ClInclude Include="Tracking\FaceTrackingService.h">
+      <Filter>Tracking</Filter>
+    </ClInclude>
+    <ClInclude Include="Tracking\TrackingMapper.h">
+      <Filter>Tracking</Filter>
+    </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>

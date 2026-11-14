@@ -11,6 +11,8 @@
 #include "OutputWindow.h"
 #include "StageRenderer.h"
 #include "PerformanceMonitor.h"
+#include "../Tracking/FaceTrackingService.h"
+#include "../Tracking/TrackingMapper.h"
 #include "../Cubism/Live2D.h"
 
 #define U8(text) reinterpret_cast<const char*>(u8##text)
@@ -106,6 +108,16 @@ struct StageView::Impl : public Rml::EventListener
 	Stage* stage = nullptr;
 	OutputWindow* output = nullptr;
 	const PerformanceMonitor* monitor = nullptr;
+	FaceTrackingService* tracking = nullptr;
+	TrackingMapper* mapper = nullptr;
+
+	// フェイストラッキング
+	std::vector<Rml::String> cameras;
+	int cameraIndex = 0;
+	bool trackingOn = false;
+	Rml::String trackingStatus;
+	Rml::String trackingInfo;
+	Rml::String trackingError;
 	StageView* owner = nullptr;
 
 	// 配信前チェック
@@ -215,6 +227,12 @@ struct StageView::Impl : public Rml::EventListener
 		constructor.Bind("luts", &luts);
 		constructor.Bind("models", &models);
 		constructor.Bind("actors", &actors);
+		constructor.Bind("cameras", &cameras);
+		constructor.Bind("camera_index", &cameraIndex);
+		constructor.Bind("tracking_on", &trackingOn);
+		constructor.Bind("tracking_status", &trackingStatus);
+		constructor.Bind("tracking_info", &trackingInfo);
+		constructor.Bind("tracking_error", &trackingError);
 		constructor.Bind("check_open", &checkOpen);
 		constructor.Bind("checks", &checks);
 		constructor.Bind("check_summary", &checkSummary);
@@ -348,6 +366,45 @@ struct StageView::Impl : public Rml::EventListener
 		constructor.BindEventCallback("look_changed", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { ApplyLook(); });
 		constructor.BindEventCallback("normalize", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { stage->NormalizeLooks(); });
 		constructor.BindEventCallback("reset_normalize", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { stage->ResetNormalize(); });
+		constructor.BindEventCallback("select_camera", [this, argInt](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
+		{
+			Sync(cameraIndex, argInt(args), "camera_index");
+			if (tracking != nullptr && trackingOn)
+			{
+				tracking->Start(cameraIndex);  // 動作中ならカメラを切り替える
+			}
+		});
+		constructor.BindEventCallback("refresh_cameras", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+		{
+			RefreshCameras();
+		});
+		constructor.BindEventCallback("toggle_tracking", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+		{
+			if (tracking == nullptr)
+			{
+				return;
+			}
+			if (tracking->GetStatus() == TrackingStatus::Running || tracking->GetStatus() == TrackingStatus::Starting)
+			{
+				tracking->Stop();
+			}
+			else
+			{
+				if (mapper != nullptr)
+				{
+					mapper->Reset();
+					mapper->RequestCalibration();  // 始めたときの姿勢を正面にする
+				}
+				tracking->Start(cameraIndex);
+			}
+		});
+		constructor.BindEventCallback("calibrate", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+		{
+			if (mapper != nullptr)
+			{
+				mapper->RequestCalibration();
+			}
+		});
 		constructor.BindEventCallback("toggle_check", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
 		{
 			Sync(checkOpen, !checkOpen, "check_open");
@@ -359,6 +416,25 @@ struct StageView::Impl : public Rml::EventListener
 
 		model = constructor.GetModelHandle();
 		return true;
+	}
+
+	void RefreshCameras()
+	{
+		if (tracking == nullptr)
+		{
+			return;
+		}
+		cameras.clear();
+		for (const CameraDevice& device : tracking->RefreshDevices())
+		{
+			cameras.push_back(device.name);
+		}
+		if (cameraIndex >= static_cast<int>(cameras.size()))
+		{
+			cameraIndex = 0;
+		}
+		model.DirtyVariable("cameras");
+		model.DirtyVariable("camera_index");
 	}
 
 	// UI のスライダーの値をルックに反映する
@@ -548,6 +624,16 @@ void StageView::SetPerformanceMonitor(const PerformanceMonitor* monitor)
 	}
 }
 
+void StageView::SetTracking(FaceTrackingService* service, TrackingMapper* mapper)
+{
+	if (_impl)
+	{
+		_impl->tracking = service;
+		_impl->mapper = mapper;
+		_impl->RefreshCameras();
+	}
+}
+
 void StageView::GetPreviewBackground(float rgb[3]) const
 {
 	const bool chroma = _impl && _impl->previewChroma;
@@ -667,6 +753,25 @@ void StageView::Update()
 		impl.Sync(impl.selectedName, Rml::String(actor.name), "selected_name");
 		impl.Sync(impl.awayDelay, actor.presence.GetSettings().awayDelay, "away_delay");
 		impl.Sync(impl.returnDelay, actor.presence.GetSettings().returnDelay, "return_delay");
+	}
+
+	// ---- フェイストラッキング ----
+	if (impl.tracking != nullptr)
+	{
+		const TrackingStatus status = impl.tracking->GetStatus();
+		impl.Sync(impl.trackingOn, status == TrackingStatus::Running || status == TrackingStatus::Starting, "tracking_on");
+		impl.Sync(impl.trackingStatus, Rml::String(GetTrackingStatusName(status)), "tracking_status");
+		Rml::String info;
+		if (status == TrackingStatus::Running)
+		{
+			FaceTrackingResult result;
+			unsigned long long frame = 0;
+			impl.tracking->GetLatest(result, frame);
+			info = Rml::CreateString(U8("%s　%.0f fps　推定 %.0f ms"), result.found ? U8("顔: 検出") : U8("顔: なし"),
+				impl.tracking->GetCameraFps(), result.processMilliseconds);
+		}
+		impl.Sync(impl.trackingInfo, info, "tracking_info");
+		impl.Sync(impl.trackingError, status == TrackingStatus::Error ? impl.tracking->GetError() : Rml::String(), "tracking_error");
 	}
 
 	// ---- 配信前チェック ----

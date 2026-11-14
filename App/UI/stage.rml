@@ -32,6 +32,20 @@
 	<div id="participants" class="panel">
 		<div class="panel-title">参加者</div>
 		<div class="panel-body">
+			<div class="tracking">
+				<div class="tracking-head">
+					<span class="caption">トラッキング（自分）</span>
+					<button class="small" data-class-active="tracking_on" data-event-click="toggle_tracking">{{tracking_on ? '停止' : 'カメラで動かす'}}</button>
+				</div>
+				<div data-if="cameras.size == 0" class="muted">カメラが見つかりません <button class="small" data-event-click="refresh_cameras">再検索</button></div>
+				<button class="camera" data-for="camera, c : cameras" data-class-active="camera_index == c" data-event-click="select_camera(c)">{{camera}}</button>
+				<div class="tracking-status">
+					<span class="muted">{{tracking_status}}</span> <span>{{tracking_info}}</span>
+				</div>
+				<div data-if="tracking_error != ''" class="warn">{{tracking_error}}</div>
+				<button class="small" data-if="tracking_on" data-event-click="calibrate">今の姿勢を正面にする</button>
+			</div>
+
 			<div class="actor" data-for="actor, i : actors" data-class-selected="actor.selected" data-event-click="select_actor(i)">
 				<div class="actor-name">{{actor.name}}</div>
 				<div class="actor-status">

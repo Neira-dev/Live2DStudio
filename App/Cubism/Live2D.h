@@ -105,6 +105,11 @@ public:
 	void GetAverageColor(float rgb[3]) const;
 
 	/**
+	 * @brief フェイストラッキングの値（パラメータ ID と値）。空ならトラッキングしない
+	 */
+	void SetTrackingParameters(const std::vector<std::pair<std::string, float>>& values);
+
+	/**
 	 * @brief 表示位置（画面中央が 0,0。上下の端が ±1）
 	 */
 	void SetPosition(float x, float y);

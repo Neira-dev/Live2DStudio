@@ -685,10 +685,35 @@ public:
 		_model->SaveParameters();
 		_opacity = _model->GetModelOpacity();
 
+		// フェイストラッキング（SaveParameters の後なので次のフレームに持ち越さない）
+		// 物理演算が頭の動きに追従するよう、先に全て反映する
+		ApplyTracking(false);
+
 		// 目パチ・呼吸・物理演算・ポーズ
 		_updateScheduler.OnLateUpdate(_model, deltaSeconds);
 
+		// 自動の目パチで上書きされた目・口・眉を、トラッキングの値に戻す
+		ApplyTracking(true);
+
 		_model->Update();
+	}
+
+	void SetTrackingParameters(const std::vector<std::pair<std::string, float>>& values) override
+	{
+		_tracking.clear();
+		CubismIdManager* ids = CubismFramework::GetIdManager();
+		for (const auto& [name, value] : values)
+		{
+			auto it = _trackingIds.find(name);
+			if (it == _trackingIds.end())
+			{
+				it = _trackingIds.emplace(name, ids->GetId(name.c_str())).first;
+			}
+			// 顔のパーツ（目・口・眉）は目パチの後にもう一度かける
+			const bool face = name.find("Eye") != std::string::npos || name.find("Mouth") != std::string::npos ||
+				name.find("Brow") != std::string::npos;
+			_tracking.push_back({ it->second, value, face });
+		}
 	}
 
 	void Draw(ID3D12GraphicsCommandList* commandList, const Live2DRenderTarget& target) override
@@ -876,6 +901,21 @@ private:
 		return motion;
 	}
 
+	void ApplyTracking(bool faceOnly)
+	{
+		for (const TrackingValue& value : _tracking)
+		{
+			if (!faceOnly || value.face)
+			{
+				const csmInt32 index = _model->GetParameterIndex(value.id);
+				if (index >= 0)
+				{
+					_model->SetParameterValue(index, value.value);
+				}
+			}
+		}
+	}
+
 	void ComputeBounds()
 	{
 		float left = FLT_MAX, right = -FLT_MAX, bottom = FLT_MAX, top = -FLT_MAX;
@@ -997,6 +1037,16 @@ private:
 	float _screenBounds[4] = { -1.0f, 1.0f, -1.0f, 1.0f };  // 最後に描いたときの範囲（NDC）
 	bool _hasScreenBounds = false;
 	float _averageColor[3] = { 0.5f, 0.5f, 0.5f };
+
+	// フェイストラッキング
+	struct TrackingValue
+	{
+		CubismIdHandle id;
+		float value;
+		bool face;
+	};
+	std::vector<TrackingValue> _tracking;
+	std::map<std::string, CubismIdHandle> _trackingIds;
 };
 
 } // namespace

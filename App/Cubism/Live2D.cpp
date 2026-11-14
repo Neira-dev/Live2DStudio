@@ -145,6 +145,11 @@ void Live2D::GetAverageColor(float rgb[3]) const
 	_model->GetAverageColor(rgb);
 }
 
+void Live2D::SetTrackingParameters(const std::vector<std::pair<std::string, float>>& values)
+{
+	_model->SetTrackingParameters(values);
+}
+
 void Live2D::SetWorldPosition(float x, float y, float z)
 {
 	_worldPosition[0] = x;

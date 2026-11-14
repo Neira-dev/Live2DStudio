@@ -10,6 +10,9 @@
 #include <d3d12.h>
 #include <filesystem>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "Live2DLook.h"
 
@@ -111,5 +114,11 @@ public:
 	 * @brief テクスチャの平均色（不透明な所の平均、0〜1）。「見た目を揃える」に使う
 	 */
 	virtual void GetAverageColor(float rgb[3]) const = 0;
+
+	/**
+	 * @brief フェイストラッキングの値（パラメータ ID と値）。空ならトラッキングしない
+	 * @details モーションの後・物理演算の前にかける。目・口・眉は自動の目パチより優先する
+	 */
+	virtual void SetTrackingParameters(const std::vector<std::pair<std::string, float>>& values) = 0;
 	virtual bool IsLoaded() const = 0;
 };

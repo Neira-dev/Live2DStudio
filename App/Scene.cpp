@@ -4,6 +4,8 @@
 #include "Stage/OutputWindow.h"
 #include "Stage/StageView.h"
 #include "Stage/PerformanceMonitor.h"
+#include "Tracking/FaceTrackingService.h"
+#include "Tracking/TrackingMapper.h"
 #include "../DirectX12/DX12Device.h"
 #include "../DirectX12/DX12CommandQueue.h"
 #include "../DirectX12/DX12Renderer.h"
@@ -70,6 +72,10 @@ void Scene::Init(DX12Device* device, DX12CommandQueue* commandQueue, DX12Rendere
 		_monitor.reset();
 	}
 
+	// フェイストラッキング（カメラは UI から開始する）
+	_tracking = std::make_unique<FaceTrackingService>("Tracking/Models");
+	_trackingMapper = std::make_unique<TrackingMapper>();
+
 	// ステージ画面の UI（RmlUi）
 	if (_stage && uiContext != nullptr)
 	{
@@ -81,6 +87,7 @@ void Scene::Init(DX12Device* device, DX12CommandQueue* commandQueue, DX12Rendere
 		else
 		{
 			_view->SetPerformanceMonitor(_monitor.get());
+			_view->SetTracking(_tracking.get(), _trackingMapper.get());
 		}
 	}
 
@@ -100,6 +107,7 @@ void Scene::Update()
 		deltaSeconds = 0.1f;
 	}
 
+	UpdateTracking(deltaSeconds);
 	if (_stage)
 	{
 		_stage->Update(deltaSeconds);
@@ -111,6 +119,38 @@ void Scene::Update()
 	if (_view)
 	{
 		_view->Update();
+	}
+}
+
+void Scene::UpdateTracking(float deltaSeconds)
+{
+	if (!_tracking || !_trackingMapper || !_stage || _stage->GetActorCount() == 0)
+	{
+		return;
+	}
+
+	StageActor& self = _stage->GetActor(0);
+	const bool running = _tracking->GetStatus() == TrackingStatus::Running;
+	self.trackingActive = running;
+	if (!running)
+	{
+		// 止めたらモーションの動きに戻す
+		if (_trackingApplied)
+		{
+			self.live2d->SetTrackingParameters({});
+			_trackingApplied = false;
+		}
+		return;
+	}
+
+	_trackingDelta += deltaSeconds;
+	FaceTrackingResult result;
+	if (_tracking->GetLatest(result, _trackingFrame))
+	{
+		self.trackingFace = result.found;
+		self.live2d->SetTrackingParameters(_trackingMapper->Map(result, _trackingDelta));
+		_trackingApplied = true;
+		_trackingDelta = 0.0f;
 	}
 }
 
@@ -178,6 +218,12 @@ void Scene::UnInit()
 		_commandQueue->Flush();
 	}
 	_view.reset();
+	if (_tracking)
+	{
+		_tracking->Stop();
+	}
+	_tracking.reset();
+	_trackingMapper.reset();
 	_monitor.reset();
 	_stage.reset();
 	_output.reset();

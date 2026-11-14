@@ -153,6 +153,10 @@
     <ClCompile Include="App.cpp" />
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="Tracking\FaceTracker.cpp" />
+    <ClCompile Include="Tracking\CameraCapture.cpp" />
+    <ClCompile Include="Tracking\FaceTrackingService.cpp" />
+    <ClCompile Include="Tracking\TrackingMapper.cpp" />
     <ClCompile Include="Stage\StageView.cpp" />
     <ClCompile Include="Stage\PerformanceMonitor.cpp" />
     <ClCompile Include="UI\RmlRenderer_D3D12.cpp" />
@@ -231,6 +235,10 @@
   <ItemGroup>
     <ClInclude Include="App.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="Tracking\FaceTracker.h" />
+    <ClInclude Include="Tracking\CameraCapture.h" />
+    <ClInclude Include="Tracking\FaceTrackingService.h" />
+    <ClInclude Include="Tracking\TrackingMapper.h" />
     <None Include="UI\stage.rml" />
     <None Include="UI\stage.rcss" />
     <ClInclude Include="Stage\StageView.h" />

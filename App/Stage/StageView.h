@@ -22,6 +22,8 @@ namespace Rml
 class Stage;
 class OutputWindow;
 class PerformanceMonitor;
+class FaceTrackingService;
+class TrackingMapper;
 
 class StageView
 {
@@ -41,6 +43,11 @@ public:
 	 * @brief 配信前チェックで使う負荷の計測
 	 */
 	void SetPerformanceMonitor(const PerformanceMonitor* monitor);
+
+	/**
+	 * @brief フェイストラッキングの操作（カメラの選択・開始・停止・キャリブレーション）
+	 */
+	void SetTracking(FaceTrackingService* service, TrackingMapper* mapper);
 
 	/**
 	 * @brief Stage の状態を UI に映す（毎フレーム、RmlUi の Update の前）

@@ -56,6 +56,10 @@ struct StageActor
 	bool testFaceLost = false;     // テスト用：顔ロスト
 	bool testDisconnected = false; // テスト用：回線断
 
+	// フェイストラッキング（動作中は顔が映っているかを離席検知に使う）
+	bool trackingActive = false;
+	bool trackingFace = false;
+
 	float normalize[3] = { 1.0f, 1.0f, 1.0f };  // 「見た目を揃える」の補正
 };
 

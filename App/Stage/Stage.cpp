@@ -293,7 +293,8 @@ void Stage::Update(float deltaSeconds)
 
 	for (auto& actor : _actors)
 	{
-		actor->presence.Update(deltaSeconds, !actor->testFaceLost, !actor->testDisconnected);
+		const bool faceVisible = !actor->testFaceLost && (!actor->trackingActive || actor->trackingFace);
+		actor->presence.Update(deltaSeconds, faceVisible, !actor->testDisconnected);
 
 		// 回線断の間は最後のフレームのまま止める
 		if (!actor->presence.IsConnectionLost())
