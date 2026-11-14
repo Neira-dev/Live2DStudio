@@ -24,6 +24,7 @@
 
 			<label class="check gap"><input type="checkbox" data-checked="output_visible" data-event-change="output_changed"/> 出力ウィンドウ</label>
 			<label class="check"><input type="checkbox" data-checked="preview_chroma"/> プレビューをクロマキー背景に</label>
+			<button class="gap" data-class-active="check_open" data-event-click="toggle_check">配信前チェック</button>
 		</div>
 	</div>
 
@@ -85,6 +86,18 @@
 				data-class-lost="actor.state_class == 'lost'"
 				data-style-left="actor.label_left" data-style-top="actor.label_top">{{actor.label}}</div>
 			<div id="preview-hint">ドラッグ: 移動　ホイール: 拡大縮小</div>
+		</div>
+	</div>
+
+	<!-- ===== 配信前チェック（プレビューの上に重ねる）===== -->
+	<div id="checklist" data-if="check_open">
+		<div class="panel-title">配信前チェック <span class="muted">{{check_summary}}</span>
+			<button class="small close" data-event-click="toggle_check">閉じる</button></div>
+		<div class="check-row" data-for="check : checks">
+			<span class="badge" data-class-ok="check.status == 'ok'" data-class-warn="check.status == 'warn'" data-class-na="check.status == 'na'">{{check.status_text}}</span>
+			<span class="check-name">{{check.name}}</span>
+			<span class="check-result">{{check.result}}</span>
+			<div class="check-hint" data-if="check.hint != ''">→ {{check.hint}}</div>
 		</div>
 	</div>
 

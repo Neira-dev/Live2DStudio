@@ -3,6 +3,7 @@
 #include "Stage/Stage.h"
 #include "Stage/OutputWindow.h"
 #include "Stage/StageView.h"
+#include "Stage/PerformanceMonitor.h"
 #include "../DirectX12/DX12Device.h"
 #include "../DirectX12/DX12CommandQueue.h"
 #include "../DirectX12/DX12Renderer.h"
@@ -62,6 +63,13 @@ void Scene::Init(DX12Device* device, DX12CommandQueue* commandQueue, DX12Rendere
 	_output.reset();
 	}
 
+	// 配信前チェック用の負荷の計測
+	_monitor = std::make_unique<PerformanceMonitor>();
+	if (!_monitor->Initialize(device->GetDevice(), commandQueue->GetCommandQueue()))
+	{
+		_monitor.reset();
+	}
+
 	// ステージ画面の UI（RmlUi）
 	if (_stage && uiContext != nullptr)
 	{
@@ -69,6 +77,10 @@ void Scene::Init(DX12Device* device, DX12CommandQueue* commandQueue, DX12Rendere
 		if (!_view->Initialize(uiContext, *_stage, _output.get()))
 		{
 			_view.reset();
+		}
+		else
+		{
+			_view->SetPerformanceMonitor(_monitor.get());
 		}
 	}
 
@@ -92,6 +104,10 @@ void Scene::Update()
 	{
 		_stage->Update(deltaSeconds);
 	}
+	if (_monitor)
+	{
+		_monitor->Update(deltaSeconds);
+	}
 	if (_view)
 	{
 		_view->Update();
@@ -104,6 +120,11 @@ void Scene::Draw(ID3D12GraphicsCommandList* commandList)
 	if (!_stage || !_view)
 	{
 		return;
+	}
+
+	if (_monitor)
+	{
+		_monitor->BeginGpu(commandList);
 	}
 
 	// 1. 参加者をステージ用テクスチャに描く
@@ -127,7 +148,12 @@ void Scene::Draw(ID3D12GraphicsCommandList* commandList)
 	commandList->ClearRenderTargetView(_renderer->GetCurrentRTV(), areaColor, 1, &_view->GetPreviewArea());
 	_stage->Composite(commandList, _renderer->GetCurrentRTV(), _view->GetPreviewViewport(), _view->GetPreviewScissor(), background);
 
-	// ImGui 用に描画先を戻す
+	if (_monitor)
+	{
+		_monitor->EndGpu(commandList);
+	}
+
+	// UI 用に描画先を戻す
 	const D3D12_CPU_DESCRIPTOR_HANDLE rtv = _renderer->GetCurrentRTV();
 	const D3D12_CPU_DESCRIPTOR_HANDLE dsv = _renderer->GetDSV();
 	commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
@@ -152,6 +178,7 @@ void Scene::UnInit()
 		_commandQueue->Flush();
 	}
 	_view.reset();
+	_monitor.reset();
 	_stage.reset();
 	_output.reset();
 	if (_live2dStarted)

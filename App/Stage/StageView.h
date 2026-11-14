@@ -21,6 +21,7 @@ namespace Rml
 }
 class Stage;
 class OutputWindow;
+class PerformanceMonitor;
 
 class StageView
 {
@@ -35,6 +36,11 @@ public:
 	 */
 	bool Initialize(Rml::Context* context, Stage& stage, OutputWindow* output);
 	void Shutdown();
+
+	/**
+	 * @brief 配信前チェックで使う負荷の計測
+	 */
+	void SetPerformanceMonitor(const PerformanceMonitor* monitor);
 
 	/**
 	 * @brief Stage の状態を UI に映す（毎フレーム、RmlUi の Update の前）

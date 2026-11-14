@@ -9,6 +9,7 @@ class DX12Renderer;
 class Stage;
 class OutputWindow;
 class StageView;
+class PerformanceMonitor;
 namespace Rml { class Context; }
 
 /*
@@ -36,6 +37,7 @@ private:
 	std::unique_ptr<Stage> _stage;
 	std::unique_ptr<OutputWindow> _output;
 	std::unique_ptr<StageView> _view;
+	std::unique_ptr<PerformanceMonitor> _monitor;
 	std::chrono::steady_clock::time_point _prevTime;
 	bool _live2dStarted = false;
 

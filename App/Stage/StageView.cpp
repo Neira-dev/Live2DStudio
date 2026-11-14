@@ -10,6 +10,7 @@
 #include "Stage.h"
 #include "OutputWindow.h"
 #include "StageRenderer.h"
+#include "PerformanceMonitor.h"
 #include "../Cubism/Live2D.h"
 
 #define U8(text) reinterpret_cast<const char*>(u8##text)
@@ -47,6 +48,32 @@ namespace
 		}
 	};
 
+	// 配信前チェックの 1 項目
+	struct CheckView
+	{
+		Rml::String name;
+		Rml::String result;
+		Rml::String hint;
+		Rml::String status;       // ok / warn / na
+		Rml::String statusText;   // 合格 / 要注意 / 未対応
+
+		bool operator==(const CheckView& o) const
+		{
+			return name == o.name && result == o.result && hint == o.hint && status == o.status && statusText == o.statusText;
+		}
+	};
+
+	CheckView MakeCheck(const char* name, const Rml::String& result, int status, const char* hint)
+	{
+		CheckView check;
+		check.name = name;
+		check.result = result;
+		check.status = (status == 0) ? "ok" : (status == 1) ? "warn" : "na";
+		check.statusText = (status == 0) ? U8("合格") : (status == 1) ? U8("要注意") : U8("未対応");
+		check.hint = (status == 0) ? "" : hint;
+		return check;
+	}
+
 	Rml::String Px(float value)
 	{
 		return Rml::CreateString("%.0fpx", value);
@@ -78,7 +105,13 @@ struct StageView::Impl : public Rml::EventListener
 	Rml::DataModelHandle model;
 	Stage* stage = nullptr;
 	OutputWindow* output = nullptr;
+	const PerformanceMonitor* monitor = nullptr;
 	StageView* owner = nullptr;
+
+	// 配信前チェック
+	bool checkOpen = false;
+	std::vector<CheckView> checks;
+	Rml::String checkSummary;
 
 	// ---- データモデルの変数 ----
 	std::vector<Rml::String> layouts;
@@ -166,6 +199,15 @@ struct StageView::Impl : public Rml::EventListener
 			handle.RegisterMember("box_height", &ActorView::boxHeight);
 		}
 		constructor.RegisterArray<std::vector<ActorView>>();
+		if (auto handle = constructor.RegisterStruct<CheckView>())
+		{
+			handle.RegisterMember("name", &CheckView::name);
+			handle.RegisterMember("result", &CheckView::result);
+			handle.RegisterMember("hint", &CheckView::hint);
+			handle.RegisterMember("status", &CheckView::status);
+			handle.RegisterMember("status_text", &CheckView::statusText);
+		}
+		constructor.RegisterArray<std::vector<CheckView>>();
 		constructor.RegisterArray<std::vector<Rml::String>>();
 
 		constructor.Bind("layouts", &layouts);
@@ -173,6 +215,9 @@ struct StageView::Impl : public Rml::EventListener
 		constructor.Bind("luts", &luts);
 		constructor.Bind("models", &models);
 		constructor.Bind("actors", &actors);
+		constructor.Bind("check_open", &checkOpen);
+		constructor.Bind("checks", &checks);
+		constructor.Bind("check_summary", &checkSummary);
 
 		constructor.Bind("layout", &layout);
 		constructor.Bind("room_code", &roomCode);
@@ -303,6 +348,10 @@ struct StageView::Impl : public Rml::EventListener
 		constructor.BindEventCallback("look_changed", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { ApplyLook(); });
 		constructor.BindEventCallback("normalize", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { stage->NormalizeLooks(); });
 		constructor.BindEventCallback("reset_normalize", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { stage->ResetNormalize(); });
+		constructor.BindEventCallback("toggle_check", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+		{
+			Sync(checkOpen, !checkOpen, "check_open");
+		});
 		constructor.BindEventCallback("toggle_detail", [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
 		{
 			Sync(detailOpen, !detailOpen, "detail_open");
@@ -491,6 +540,14 @@ void StageView::Shutdown()
 	_impl.reset();
 }
 
+void StageView::SetPerformanceMonitor(const PerformanceMonitor* monitor)
+{
+	if (_impl)
+	{
+		_impl->monitor = monitor;
+	}
+}
+
 void StageView::GetPreviewBackground(float rgb[3]) const
 {
 	const bool chroma = _impl && _impl->previewChroma;
@@ -610,6 +667,72 @@ void StageView::Update()
 		impl.Sync(impl.selectedName, Rml::String(actor.name), "selected_name");
 		impl.Sync(impl.awayDelay, actor.presence.GetSettings().awayDelay, "away_delay");
 		impl.Sync(impl.returnDelay, actor.presence.GetSettings().returnDelay, "return_delay");
+	}
+
+	// ---- 配信前チェック ----
+	if (impl.checkOpen)
+	{
+		std::vector<CheckView> checks;
+		checks.push_back(MakeCheck(U8("上り速度"), U8("通信の実装後に計測します"), 2, ""));
+
+		if (impl.monitor != nullptr)
+		{
+			const float gpu = impl.monitor->GetGpuUsage();
+			checks.push_back(MakeCheck(U8("GPU 負荷"),
+				Rml::CreateString(U8("ステージ描画 %.2f ms（60fps の %.0f%%）"), impl.monitor->GetGpuMilliseconds(), gpu * 100.0f),
+				gpu <= 0.15f ? 0 : 1, U8("参加者を減らすか、ブルームや影を弱めてください")));
+			const float cpu = impl.monitor->GetCpuUsage();
+			checks.push_back(MakeCheck(U8("CPU 使用率"), Rml::CreateString("%.0f%%", cpu * 100.0f),
+				cpu <= 0.15f ? 0 : 1, U8("使っていないアプリを閉じてください")));
+			const float drop = impl.monitor->GetDropRate();
+			checks.push_back(MakeCheck(U8("フレーム落ち"),
+				Rml::CreateString(U8("%.0f fps、落ち %.1f%%（直近 10 秒）"), impl.monitor->GetFps(), drop * 100.0f),
+				drop < 0.01f ? 0 : 1, U8("ゲームの設定を下げるか、このウィンドウを最小化しないでください")));
+		}
+
+		Rml::String lost;
+		for (size_t i = 0; i < stage.GetActorCount(); ++i)
+		{
+			StageActor& actor = stage.GetActor(i);
+			if (actor.testDisconnected || actor.presence.IsConnectionLost())
+			{
+				lost += (lost.empty() ? "" : U8("、")) + actor.name;
+			}
+		}
+		checks.push_back(MakeCheck(U8("全員の接続"),
+			lost.empty() ? Rml::CreateString(U8("%d 人とも接続中"), static_cast<int>(stage.GetActorCount())) : lost + U8(" が切断"),
+			lost.empty() ? 0 : 1, U8("切断している参加者の回線を確認してください")));
+
+		checks.push_back(MakeCheck(U8("音声とのズレ"), U8("通信の実装後に調整できます"), 2, ""));
+
+		const bool outputVisible = impl.output != nullptr && impl.output->IsVisible();
+		checks.push_back(MakeCheck(U8("出力ウィンドウ"), outputVisible ? U8("表示中（1920x1080）") : U8("非表示"),
+			outputVisible ? 0 : 1, U8("上部の「出力ウィンドウ」にチェックを入れ、OBS のウィンドウキャプチャで「CoStage Output」を選んでください")));
+
+		bool hotkeysOk = impl.output != nullptr;
+		for (int i = 0; hotkeysOk && i < static_cast<int>(StageHotkey::Count); ++i)
+		{
+			hotkeysOk = impl.output->IsHotkeyRegistered(static_cast<StageHotkey>(i));
+		}
+		checks.push_back(MakeCheck(U8("ホットキー"), hotkeysOk ? U8("すべて使えます") : U8("使えないキーがあります"),
+			hotkeysOk ? 0 : 1, U8("他のアプリが同じキーを使っています。そのアプリの設定を変えてください")));
+
+		int passed = 0;
+		int total = 0;
+		for (const CheckView& check : checks)
+		{
+			if (check.status != "na")
+			{
+				++total;
+				passed += (check.status == "ok") ? 1 : 0;
+			}
+		}
+		impl.Sync(impl.checkSummary, Rml::CreateString(U8("%d 項目中 %d 項目が合格"), total, passed), "check_summary");
+		if (!(checks == impl.checks))
+		{
+			impl.checks = std::move(checks);
+			impl.model.DirtyVariable("checks");
+		}
 	}
 
 	// ---- ルック ----

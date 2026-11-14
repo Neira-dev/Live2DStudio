@@ -234,3 +234,37 @@ scrollbarvertical sliderarrowdec, scrollbarvertical sliderarrowinc { height: 0; 
 	color: #9aa3b5;
 	font-size: 12px;
 }
+
+/* ---------- 配信前チェック ---------- */
+#checklist {
+	position: absolute;
+	top: 80px;
+	left: 290px;
+	right: 350px;
+	padding-bottom: 8px;
+	background-color: #1d2027f0;
+	border: 1px #46506a;
+	border-radius: 6px;
+}
+#checklist .panel-title { border-radius: 6px 6px 0 0; }
+#checklist .close { float: right; margin-top: 3px; }
+.check-row {
+	display: block;
+	padding: 5px 12px;
+	border-bottom: 1px #2c313b;
+}
+.badge {
+	display: inline-block;
+	width: 52px;
+	margin-right: 8px;
+	padding: 0 4px;
+	border-radius: 3px;
+	text-align: center;
+	font-size: 12px;
+}
+.badge.ok { background-color: #2e7d32; }
+.badge.warn { background-color: #c0562f; }
+.badge.na { background-color: #4a5262; }
+.check-name { display: inline-block; width: 110px; font-weight: bold; }
+.check-result { color: #c4cbd8; }
+.check-hint { display: block; margin: 2px 0 0 64px; color: #ffb38a; font-size: 13px; }

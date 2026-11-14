@@ -77,6 +77,9 @@
     <ClCompile Include="Stage\Stage.cpp">
       <Filter>Stage</Filter>
     </ClCompile>
+    <ClCompile Include="Stage\PerformanceMonitor.cpp">
+      <Filter>Stage</Filter>
+    </ClCompile>
     <ClCompile Include="Stage\StageView.cpp">
       <Filter>Stage</Filter>
     </ClCompile>
@@ -273,6 +276,9 @@
     </ClInclude>
     <ClInclude Include="Cubism\Live2DLook.h">
       <Filter>Live2D</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage\PerformanceMonitor.h">
+      <Filter>Stage</Filter>
     </ClInclude>
     <ClInclude Include="Stage\StageView.h">
       <Filter>Stage</Filter>

@@ -154,6 +154,7 @@
     <ClCompile Include="EntryPoint.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Stage\StageView.cpp" />
+    <ClCompile Include="Stage\PerformanceMonitor.cpp" />
     <ClCompile Include="UI\RmlRenderer_D3D12.cpp" />
     <ClCompile Include="UI\RmlUiLayer.cpp" />
     <ClCompile Include="Stage\StageLook.cpp" />
@@ -233,6 +234,7 @@
     <None Include="UI\stage.rml" />
     <None Include="UI\stage.rcss" />
     <ClInclude Include="Stage\StageView.h" />
+    <ClInclude Include="Stage\PerformanceMonitor.h" />
     <ClInclude Include="UI\RmlRenderer_D3D12.h" />
     <ClInclude Include="UI\RmlUiLayer.h" />
     <ClInclude Include="Stage\StageLook.h" />
